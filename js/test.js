@@ -1,25 +1,6 @@
-function loadTestData()
-{
-    var str = "";
-    str += "		[0]	-0.000000000	float\n"
-    str += "		[1]	+0.500000000	float\n"
-    str += "		[2]	-0.500000000	float\n"
-    str += "		[3]	0.00000000	float\n"
-    str += "		[4]	9.99999972e-10	float\n"
-    str += "		[5]	9.99999972e+10	float\n"
-
-    str += "+		[0]	{x=1.00000000 y=-2.00000000 z=3.00000000 }	Vec3\n";
-    str += "+		[1]	{x=4.00000000 y=-5.00000000 z=6.00000000 }	Vec3\n";
-    str += "+		[2]	{x=7.00000000 y=-8.00000000 z=9.00000000 }	Vec3\n";
-    str += "+		[3]	{x=10.0000000 y=-11.0000000 z=12.0000000 }	Vec3\n";
-    str += "+		[4]	{x=13.0000000 y=-14.0000000 z=15.0000000 }	Vec3\n";
-    str += "+		[5]	{x=16.0000000 y=-17.0000000 z=18.0000000 }	Vec3\n";
-    str += "+		[6]	{x=19.0000000 y=-20.0000000 z=21.0000000 }	Vec3\n";
-    str += "+		[7]	{x=22.0000000 y=-23.0000000 z=24.0000000 }	Vec3\n";
-    str += "+		[8]	{x=25.0000000 y=-26.0000000 z=27.0000000 }	Vec3\n";
-    str += "+		[9]	{x=28.0000000 y=-29.0000000 z=30.0000000 }	Vec3\n";
-
-    var vStr = "";
+'use strict';
+export function loadTestData() {
+    let vStr = "";
     vStr += "+		[0]	{x=-0.500000000 y=-0.500000000 y=1.500000000 }	Vec3\n";            // red
     vStr += "+		[1]	{x=-0.500000000 y=0.500000000 y=1.500000000 }	Vec3\n";
     vStr += "+		[2]	{x=0.500000000 y=0.500000000 y=1.500000000 }	Vec3\n";
@@ -62,7 +43,7 @@ function loadTestData()
     vStr += "+		[34]	{x=0.500000000 y=0.500000000 y=1.500000000 }	Vec3\n";
     vStr += "+		[35]	{x=-0.500000000 y=0.500000000 y=1.500000000 }	Vec3\n";
 
-    var iStr = "";
+    let iStr = "";
     iStr += "		[0]	0	int\n";
     iStr += "		[1]	1	int\n";
     iStr += "		[2]	2	int\n";
@@ -98,9 +79,9 @@ function loadTestData()
     iStr += "		[32]	32	int\n";
     iStr += "		[33]	33	int\n";
     iStr += "		[34]	34	int\n";
-    iStr += "		[35]	35	int\n";    
+    iStr += "		[35]	35	int\n";
 
-    var nStr = "";
+    let nStr = "";
     nStr += "		[0]	0.00000000	float\n";
     nStr += "		[1]	0.00000000	float\n";
     nStr += "		[2]	-1.00000000	float\n";
@@ -210,7 +191,7 @@ function loadTestData()
     nStr += "		[106]	1.00000000	float\n";
     nStr += "		[107]	0.00000000	float\n";
 
-    var cStr = "";
+    let cStr = "";
     cStr += "+		[0]	{x=1.00000000 y=0.00000000 z=0.00000000 }	Vec3\n";        // red
     cStr += "+		[1]	{x=1.00000000 y=0.00000000 z=0.00000000 }	Vec3\n";
     cStr += "+		[2]	{x=1.00000000 y=0.00000000 z=0.00000000 }	Vec3\n";
@@ -246,8 +227,7 @@ function loadTestData()
     cStr += "+		[32]	{x=1.00000000 y=0.00000000 z=1.00000000 }	Vec3\n";
     cStr += "+		[33]	{x=1.00000000 y=0.00000000 z=1.00000000 }	Vec3\n";
     cStr += "+		[34]	{x=1.00000000 y=0.00000000 z=1.00000000 }	Vec3\n";
-    cStr += "+		[35]	{x=1.00000000 y=0.00000000 z=1.00000000 }	Vec3\n";    
-
+    cStr += "+		[35]	{x=1.00000000 y=0.00000000 z=1.00000000 }	Vec3\n";
 
     document.getElementById("verticesTextarea").value = vStr;
     document.getElementById("indicesTextarea").value = iStr;

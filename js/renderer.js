@@ -1,15 +1,15 @@
-import * as THREE from 'https://unpkg.com/three/build/three.module.js'
-//import { OrbitControls } from './three.js/examples/jsm/controls/OrbitControls.js'
-import { TrackballControls } from './three.js/examples/jsm/controls/TrackballControls.js'
-//import { GUI } from './three.js/examples/jsm/libs/dat.gui.module.js';
+'use strict';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.module.js'
+import * as dat from 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js'
+import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/controls/TrackballControls.js'
 
-export var PRIMITIVE = {
-    points: 1,
-    lines: 2,
-    triangles: 3
+export const PRIMITIVE = class {
+    static get POINTS() {return 1;}
+    static get LINES() {return 2;}
+    static get TRIANGLES() {return 3;}
 };
 
-var MESH_MATERIAL = {
+const MESH_MATERIAL = {
     POINTS: 0,
     LINEBASIC: 1,
     BASIC: 2,
@@ -30,17 +30,18 @@ var GuiParams = function () {
             for (let i in controllers) {
                 controllers[i].updateDisplay();
             }
-        };
+        }
 
         updateControllers(gui.__controllers);
         updateControllers(gui.__folders.Materials.__controllers);
     }
 };
 
-var guiParams = new GuiParams();
+var guiParams;
 var camera, scene, renderer;
 var geometry, material, mesh;
-var directionalLight, directionalLightHelper, ambientLight;
+var directionalLight, ambientLight;
+//var directionalLightHelper;
 var targetSurface;
 var gui, controls;
 var polarGridHelper, axesHelperModel, axesHelperModelBlend;
@@ -48,8 +49,8 @@ var lookatPos, viewPos;
 
 export function init() {
     targetSurface = document.getElementById('gl-canvas');
-    var surfaceWidth = targetSurface.clientWidth;
-    var surfaceHeight = targetSurface.clientHeight;
+    let surfaceWidth = targetSurface.clientWidth;
+    let surfaceHeight = targetSurface.clientHeight;
 
     camera = new THREE.PerspectiveCamera(70, surfaceWidth / surfaceHeight, 0.01, 2000);
     //camera.position.y = 1;
@@ -66,8 +67,6 @@ export function init() {
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    guiParams.meshMaterial = MESH_MATERIAL.NORMAL;
-
     polarGridHelper = new THREE.PolarGridHelper(1, 16, 8, 64, 0x444444, 0x888888);
     polarGridHelper.rotateX(THREE.Math.degToRad(90));
     scene.add(polarGridHelper)
@@ -81,10 +80,6 @@ export function init() {
     scene.add(axesHelperModel);
     scene.add(axesHelperModelBlend);
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(surfaceWidth, surfaceHeight);
-
     directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
     directionalLight.target = axesHelperModel;
     scene.add(directionalLight);
@@ -93,9 +88,13 @@ export function init() {
     ambientLight = new THREE.AmbientLight(0x606060);
     scene.add(ambientLight)
 
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(surfaceWidth, surfaceHeight);
+
     targetSurface.appendChild(renderer.domElement);
 
-    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('resize', onWindowResize, false);    
 
     controls = new TrackballControls(camera, renderer.domElement);
     controls.rotateSpeed = 4.0;
@@ -103,6 +102,9 @@ export function init() {
     controls.panSpeed = 0.8;
     controls.target.set(0, 0, 0);
     controls.update();
+
+    guiParams = new GuiParams();
+    guiParams.meshMaterial = MESH_MATERIAL.NORMAL;
 
     initGUI();
 }
@@ -237,36 +239,36 @@ export function genMesh(vertices, indices, normals, colors, vertexSize, primitiv
     // Geometry
     geometry = new THREE.BufferGeometry();
     if (vertices) {
-        var floatVertices = new Float32Array(vertices);
+        let floatVertices = new Float32Array(vertices);
         geometry.setAttribute('position', new THREE.BufferAttribute(floatVertices, vertexSize));
     }
 
     if (indices) {
-        var uintIndices = new Uint16Array(indices);
+        let uintIndices = new Uint16Array(indices);
         geometry.setIndex(new THREE.BufferAttribute(uintIndices, 1));
     }
 
     if (normals) {
-        var floatNormals = new Float32Array(normals);
+        let floatNormals = new Float32Array(normals);
         geometry.setAttribute('normal', new THREE.BufferAttribute(floatNormals, vertexSize));
     }
     else {
-        if (PRIMITIVE.triangles == primitiveType) {
+        if (PRIMITIVE.TRIANGLES == primitiveType) {
             geometry.computeVertexNormals();
         }
     }
 
     if (colors) {
-        var floatColors = new Float32Array(colors);
+        let floatColors = new Float32Array(colors);
         geometry.setAttribute('color', new THREE.BufferAttribute(floatColors, vertexSize));
     }
 
     geometry.computeBoundingSphere();
 
-    if (PRIMITIVE.points === primitiveType) {
+    if (PRIMITIVE.POINTS === primitiveType) {
         mesh = new THREE.Points(geometry);
     }
-    else if (PRIMITIVE.lines == primitiveType) {
+    else if (PRIMITIVE.LINES === primitiveType) {
         mesh = new THREE.LineSegments(geometry);
     }
     else {
@@ -275,10 +277,10 @@ export function genMesh(vertices, indices, normals, colors, vertexSize, primitiv
 
     let materialType = MESH_MATERIAL.NORMAL;
     // Meterial
-    if (PRIMITIVE.points === primitiveType) {
+    if (PRIMITIVE.POINTS === primitiveType) {
         materialType = MESH_MATERIAL.POINTS;
     }
-    else if (PRIMITIVE.lines === primitiveType) {
+    else if (PRIMITIVE.LINES === primitiveType) {
         materialType = MESH_MATERIAL.LINEBASIC;
     }
     else {

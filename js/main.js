@@ -1,7 +1,9 @@
+'use strict';
 import * as RENDERER from './renderer.js'
+import {loadTestData} from './test.js'
 
 var SETTING = {
-    primitiveType: RENDERER.PRIMITIVE.triangles
+    primitiveType: RENDERER.PRIMITIVE.TRIANGLES
 };
 
 var regexFormat, regexGroup;
@@ -10,25 +12,23 @@ var REGEX_VS = "(?:[=\\]]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
 var REGEX_CSV = "([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d)";
 
 $("#runButton").click(function () {
-    var vertices;
-    var indices;
-    var normals;
-    var colors;
-    var useIndices = document.getElementById("useIndices").checked;
-    var useNormals = document.getElementById("useNormals").checked;
-    var useColors = document.getElementById("useColors").checked;
-
-    var vertexSize = SETTING.primitiveType;
+    let vertices;
+    let indices;
+    let normals;
+    let colors;
+    let useIndices = document.getElementById("useIndices").checked;
+    let useNormals = document.getElementById("useNormals").checked;
+    let useColors = document.getElementById("useColors").checked;
 
     setRegExp();
     vertices = parseVertices();
     if (true === useIndices) {
         indices = parseIndices();
     }
-    if (true == useNormals) {
+    if (true === useNormals) {
         normals = parseNormals();
     }
-    if (true == useColors) {
+    if (true === useColors) {
         colors = parseColors();
     }
 
@@ -40,7 +40,7 @@ $("#testButton").click(function () {
 });
 
 $('#regexSelect').on('change', function () {
-    var selected = $(this).val();
+    let selected = $(this).val();
 
     if (selected.startsWith("Visual")) {
         let el = document.getElementById("regexFormat");
@@ -53,18 +53,15 @@ $('#regexSelect').on('change', function () {
 });
 
 $('#primitivePoints').change(function () {
-    //alert($(this).prop('checked'))
-    SETTING.primitiveType = RENDERER.PRIMITIVE.points;
+    SETTING.primitiveType = RENDERER.PRIMITIVE.POINTS;
 })
 
 $('#primitiveLines').change(function () {
-    //alert($(this).prop('checked'))
-    SETTING.primitiveType = RENDERER.PRIMITIVE.lines;
+    SETTING.primitiveType = RENDERER.PRIMITIVE.LINES;
 })
 
 $('#primitiveTriangles').change(function () {
-    //alert($(this).prop('checked'))
-    SETTING.primitiveType = RENDERER.PRIMITIVE.triangles;
+    SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
 })
 
 export function bodyInit() {
@@ -72,7 +69,7 @@ export function bodyInit() {
     RENDERER.animate();
 
     document.getElementById("primitiveTriangles").checked = true;
-    SETTING.primitiveType = RENDERER.PRIMITIVE.triangles;
+    SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
 }
 
 function setRegExp() {
@@ -81,46 +78,48 @@ function setRegExp() {
 }
 
 function parseValue(id) {
-    var verticesText;
-    var re;
-    var matches;
-    var value;
-    var result;
+    let verticesText;
+    let re;
+    let matches;
+    let value;
+    let result;
 
     verticesText = document.getElementById(id).value;
     re = new RegExp(regexFormat, "gm");
     result = new Array();
 
-    while (matches = re.exec(verticesText)) {
+    matches = re.exec(verticesText);
+    while (matches) {
         if (regexGroup < matches.length) {
             value = matches[regexGroup];
             result.push(value);
         }
+        matches = re.exec(verticesText);
     }
 
     return result;
 }
 
 function parseVertices() {
-    var result = parseValue("verticesTextarea");
+    let result = parseValue("verticesTextarea");
     document.getElementById("verticesTextareaReg").value = result;
     return result;
 }
 
 function parseIndices() {
-    var result = parseValue("indicesTextarea");
+    let result = parseValue("indicesTextarea");
     document.getElementById("indicesTextareaReg").value = result;
     return result;
 }
 
 function parseNormals() {
-    var result = parseValue("normalsTextarea");
+    let result = parseValue("normalsTextarea");
     document.getElementById("normalsTextareaReg").value = result;
     return result;
 }
 
 function parseColors() {
-    var result = parseValue("colorsTextarea");
+    let result = parseValue("colorsTextarea");
     document.getElementById("colorsTextareaReg").value = result;
     return result;
 }
