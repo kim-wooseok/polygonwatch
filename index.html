@@ -3,10 +3,17 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="icon" type="image/png" href="./favicon.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="./favicon-highres.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.css" rel="stylesheet" >
   <style>
     .textarea-primitive {
       font-size: 0.75em;
+    }
+
+    .div-primitive {
+      margin-top: 3em;
     }
 
     #gl-container {
@@ -14,7 +21,7 @@
     }
 
     #gl-canvas {
-      height: 640px;
+      height: 50vh;
     }
 
     #gl-gui-bg {
@@ -28,10 +35,11 @@
       line-height: initial;
     }
   </style>
-  <title>Polygon Three</title>
+  <title>Polygon three</title>
 </head>
 
 <body class="bg-light">
+
   <div class="container-fluid">
     <header>
       <div class="collapse bg-dark" id="navbarHeader">
@@ -82,8 +90,17 @@
 
     <hr />
     <div>
-      <button class="btn btn-secondary btn-lg btn-block" type="button" id="testButton">load test data</button>
-      <button class="btn btn-primary btn-lg btn-block" type="button" id="runButton">Run</button>
+      <div class="form-group row">
+        <div class="col-md-2">
+          <button class="btn btn-secondary btn-lg btn-block" type="button" id="testButton">TEST</button>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-danger btn-lg btn-block" type="button" id="clearButton">CLEAR</button>
+        </div>
+        <div class="col-md">
+          <button class="btn btn-success btn-lg btn-block" type="button" id="runButton">RUN</button>
+        </div>
+      </div>
     </div>
 
     <hr />
@@ -130,62 +147,61 @@
       </div>
 
       <div class="form-row">
-        <div class="form-group col-sd">
-          <label for="regexSelect">Raw data type</label>
+        <div class="form-group col-md-2">
+          <label for="regexSelect">Data type</label>
           <select class="form-control selectpicker" id="regexSelect">
             <option>Visual studio watch</option>
             <option>CSV</option>
           </select>
+          <small id="regexSelectHelp" class="form-text text-muted">unstructured data</small>
         </div>
         <div class="form-group col-md">
           <label for="regexFormat">Regular expression</label>
-          <input type="text" class="form-control" id="regexFormat" aria-describedby="regexFormatHelp" readonly="true"
-            value="(?:[=\]]\s*([+-]?\d*\.?\d*e?[+-]?\d*\d))">
-          <small id="regexFormatHelp" class="form-text text-muted">primitive regular expression</small>
+          <input type="text" class="form-control" id="regexFormat" aria-describedby="regexFormatHelp" readonly="true" value="(?:[=\]]\s*([+-]?\d*\.?\d*e?[+-]?\d*\d))">
+          <small id="regexFormatHelp" class="form-text text-muted">primitives</small>
         </div>
-        <div class="form-group col-md-2">
+        <div class="form-group col-md-1">
           <label for="regexGroup">Group</label>
-          <input type="text" class="form-control" id="regexGroup" aria-describedby="regexGroupHelp" readonly="true"
-            value="1">
-          <small id="regexGroupHelp" class="form-text text-muted">group. if 0 full match</small>
+          <input type="text" class="form-control" id="regexGroup" aria-describedby="regexGroupHelp" readonly="true" value="1">
+          <small id="regexGroupHelp" class="form-text text-muted">group of match</small>
         </div>
       </div>
 
       <div class="form-group row">
-        <div class="col-sm">
+        <div class="col-md div-primitive">
           <lable for="verticesTextarea">Vertices</lable>
           <textarea type="text" class="form-control textarea-primitive" id="verticesTextarea" rows="10"></textarea>
         </div>
-        <div class="col-sm">
+        <div class="col-md div-primitive">
           <lable for="indicesTextarea">Indices</lable>
           <textarea type="text" class="form-control textarea-primitive" id="indicesTextarea" rows="10"></textarea>
         </div>
-        <div class="col-sm">
+        <div class="col-md div-primitive">
           <lable for="normalsTextarea">Normals</lable>
           <textarea type="text" class="form-control textarea-primitive" id="normalsTextarea" rows="10"></textarea>
         </div>
-        <div class="col-sm">
+        <div class="col-md div-primitive">
           <lable for="colorsTextarea">Colors</lable>
           <textarea type="text" class="form-control textarea-primitive" id="colorsTextarea" rows="10"></textarea>
         </div>
       </div>
 
       <div class="form-group row">
-        <div class="col-sm">
-          <textarea type="text" class="form-control textarea-primitive" id="verticesTextareaReg" rows="10"
-            readonly="true"></textarea>
+        <div class="col-md div-primitive">
+          <lable for="verticesTextareaReg">Vertices CSV</lable>
+          <textarea type="text" class="form-control textarea-primitive" id="verticesTextareaReg" rows="10" readonly="true"></textarea>
         </div>
-        <div class="col-sm">
-          <textarea type="text" class="form-control textarea-primitive" id="indicesTextareaReg" rows="10"
-            readonly="true"></textarea>
+        <div class="col-md div-primitive">
+          <lable for="indicesTextareaReg">Indices CSV</lable>
+          <textarea type="text" class="form-control textarea-primitive" id="indicesTextareaReg" rows="10" readonly="true"></textarea>
         </div>
-        <div class="col-sm">
-          <textarea type="text" class="form-control textarea-primitive" id="normalsTextareaReg" rows="10"
-            readonly="true"></textarea>
+        <div class="col-md div-primitive">
+          <lable for="normalsTextareaReg">Normals CSV</lable>
+          <textarea type="text" class="form-control textarea-primitive" id="normalsTextareaReg" rows="10" readonly="true"></textarea>
         </div>
-        <div class="col-sm">
-          <textarea type="text" class="form-control textarea-primitive" id="colorsTextareaReg" rows="10"
-            readonly="true"></textarea>
+        <div class="col-md div-primitive">
+          <lable for="colorsTextareaReg">Colors CSV</lable>
+          <textarea type="text" class="form-control textarea-primitive" id="colorsTextareaReg" rows="10" readonly="true"></textarea>
         </div>
       </div>
     </form>
@@ -193,6 +209,8 @@
     <div>
       <h6>Links</h6>
       <ul class="list-unstyled">
+        <li><a href="https://www.youtube.com/playlist?list=PLv2d7VI9OotTVOL4QmPfvJWPJvkmv6h-2" class="link">Youtube 자바스크립트 기초 강의 (ES5+)</a></li>
+        <li><a href="https://developer.mozilla.org/ko/" class="link">MDN web docs</a></li>
         <li><a href="https://threejs.org/" class="link">three.js</a></li>
         <li><a href="https://getbootstrap.com/" class="link">bootstrap</a></li>
         <li><a href="https://github.com/dataarts/dat.gui" class="link">dat.gui</a></li>

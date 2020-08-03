@@ -35,6 +35,20 @@ $("#runButton").click(function () {
     RENDERER.genMesh(vertices, indices, normals, colors, 3, SETTING.primitiveType);
 });
 
+$("#clearButton").click(function () {
+    document.getElementById("verticesTextarea").value = "";
+    document.getElementById("verticesTextareaReg").value = "";
+
+    document.getElementById("indicesTextarea").value = "";
+    document.getElementById("indicesTextareaReg").value = "";
+
+    document.getElementById("normalsTextarea").value = "";
+    document.getElementById("normalsTextareaReg").value = "";
+
+    document.getElementById("colorsTextarea").value = "";
+    document.getElementById("colorsTextareaReg").value = "";
+});
+
 $("#testButton").click(function () {
     loadTestData();
 });
