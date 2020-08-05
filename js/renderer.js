@@ -25,15 +25,34 @@ var GuiParams = function () {
     this.objectColor = '#aaccee';
     this.meshMaterial = MESH_MATERIAL.BASIC;
 
-    this.refresh = function () {			//화면 새로고침
+    // camera
+    this.fov = 0;
+    this.aspect = 0;
+    this.near = 0;
+    this.far = 0;
+
+    // renderer
+    this.viewport = new THREE.Vector4(0, 0, 0, 0);
+    this.resetViewport = function () {
+        resetViewport();
+    }
+
+    this.refresh = function () {
         function updateControllers(controllers) {
             for (let i in controllers) {
                 controllers[i].updateDisplay();
             }
         }
 
-        updateControllers(gui.__controllers);
-        updateControllers(gui.__folders.Materials.__controllers);
+        function reculsiveGui(_gui) {
+            updateControllers(_gui.__controllers);
+            for (let k of Object.keys(_gui.__folders)) {
+                let f = _gui.__folders[k];
+                reculsiveGui(f);
+            }
+        }
+
+        reculsiveGui(gui);
     }
 };
 
@@ -52,7 +71,7 @@ export function init() {
     let surfaceWidth = targetSurface.clientWidth;
     let surfaceHeight = targetSurface.clientHeight;
 
-    camera = new THREE.PerspectiveCamera(70, surfaceWidth / surfaceHeight, 0.01, 2000);
+    camera = new THREE.PerspectiveCamera(60, surfaceWidth / surfaceHeight, 0.5, 2000);
     //camera.position.y = 1;
     camera.position.y = -4;
     camera.up.set(0, 0, 1);
@@ -91,6 +110,9 @@ export function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(surfaceWidth, surfaceHeight);
+    renderer.setClearColor(new THREE.Color(0x101020), 1.0);
+    renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
+    renderer.setScissorTest(true);
 
     targetSurface.appendChild(renderer.domElement);
 
@@ -105,6 +127,11 @@ export function init() {
 
     guiParams = new GuiParams();
     guiParams.meshMaterial = MESH_MATERIAL.NORMAL;
+    guiParams.fov = camera.fov;
+    guiParams.aspect = camera.aspect;
+    guiParams.near = camera.near;
+    guiParams.far = camera.far;
+    renderer.getViewport(guiParams.viewport);
 
     initGUI();
 }
@@ -127,20 +154,60 @@ function initGUI() {
     });
     fMat.open();
 
+    let fProp = gui.addFolder('Properties');
+    {
+        let fCam = fProp.addFolder('Camera');
+        fCam.add(guiParams, 'fov', 25, 80).onChange(function (val) {
+            camera.fov = val;
+            camera.updateProjectionMatrix();
+        });
+        let aspect = fCam.add(guiParams, 'aspect').listen();
+        aspect.domElement.style.pointerEvents = "none"
+        aspect.domElement.style.opacity = 0.5;
+        fCam.add(guiParams, 'near').name('near').onChange(function (val) {
+            if (0 < val && val < camera.far) {
+                camera.near = val;
+                camera.updateProjectionMatrix();
+            }
+            else {
+                guiParams.near = camera.near;
+                guiParams.refresh();
+            }
+        });
+        fCam.add(guiParams, 'far').onChange(function (val) {
+            if (val > camera.near) {
+                camera.far = val;
+                camera.updateProjectionMatrix();
+            }
+            else {
+                guiParams.far = camera.far;
+                guiParams.refresh();
+            }
+        });
+    }
+    {
+        let fRenderer = fProp.addFolder('Renderer');
+        fRenderer.add(guiParams.viewport, 'x').onChange(function () {
+            updateViewport(guiParams.viewport);
+        });
+        fRenderer.add(guiParams.viewport, 'y').onChange(function () {
+            updateViewport(guiParams.viewport);
+        });
+        fRenderer.add(guiParams.viewport, 'width').onChange(function () {
+            updateViewport(guiParams.viewport);
+        });
+        fRenderer.add(guiParams.viewport, 'height').onChange(function () {
+            updateViewport(guiParams.viewport);
+        });
+        fRenderer.add(guiParams, 'resetViewport').name('reset viewport');
+    }
+
     let customContainer = document.getElementById('gl-gui');
     customContainer.appendChild(gui.domElement);
 }
 
 function onWindowResize() {
-    let surfaceWidth = targetSurface.clientWidth;
-    let surfaceHeight = targetSurface.clientHeight;
-
-    camera.aspect = surfaceWidth / surfaceHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(surfaceWidth, surfaceHeight);
-
-    controls.handleResize();
+    resetViewport();
 }
 
 export function animate() {
@@ -161,6 +228,34 @@ export function animate() {
     //directionalLightHelper.update();
 
     renderer.render(scene, camera);
+}
+
+function resetViewport() {
+    let surfaceWidth = targetSurface.clientWidth;
+    let surfaceHeight = targetSurface.clientHeight;
+
+    camera.aspect = surfaceWidth / surfaceHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(surfaceWidth, surfaceHeight, true);
+    renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
+    renderer.getViewport(guiParams.viewport);
+
+    guiParams.aspect = camera.aspect;
+    guiParams.refresh(); 
+
+    controls.handleResize();
+}
+
+function updateViewport(vp) {
+    renderer.setViewport(vp);
+    renderer.setScissor(vp);
+
+    camera.aspect = vp.width / vp.height;
+    camera.updateProjectionMatrix();
+
+    guiParams.aspect = camera.aspect;
+    guiParams.refresh();
 }
 
 function updateMeshMaterial(mat) {
@@ -311,3 +406,15 @@ export function genMesh(vertices, indices, normals, colors, vertexSize, primitiv
     guiParams.meshMaterial = materialType;
     guiParams.refresh();
 }
+
+var observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+        if ('gl-canvas' === mutation.target.id) {
+            resetViewport();
+        }
+    });
+});
+var target = document.getElementById('gl-canvas');
+observer.observe(target, {
+    attributes: true
+});
