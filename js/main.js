@@ -3,7 +3,8 @@ import * as RENDERER from './renderer.js'
 import {loadTestData} from './test.js'
 
 var SETTING = {
-    primitiveType: RENDERER.PRIMITIVE.TRIANGLES
+    primitiveType: RENDERER.PRIMITIVE.TRIANGLES,
+    planeType: RENDERER.PLANE.XY
 };
 
 var regexFormat, regexGroup;
@@ -32,7 +33,7 @@ $("#runButton").click(function () {
         colors = parseColors();
     }
 
-    RENDERER.genMesh(vertices, indices, normals, colors, 3, SETTING.primitiveType);
+    RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, SETTING.primitiveType);
 });
 
 $("#clearButton").click(function () {
@@ -49,8 +50,18 @@ $("#clearButton").click(function () {
     document.getElementById("colorsTextareaReg").value = "";
 });
 
+$("#clearScene").click(function () {
+    RENDERER.clearScene();
+});
+
 $("#testButton").click(function () {
     loadTestData();
+});
+
+$(document).ready(function(){
+    $("#loadFilesButton").change(function(ev){
+        RENDERER.loadCollada(ev.currentTarget.files);
+    });
 });
 
 $('#regexSelect').on('change', function () {
@@ -78,11 +89,29 @@ $('#primitiveTriangles').change(function () {
     SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
 })
 
+$('#planeXY').change(function () {
+    SETTING.planeType = RENDERER.PLANE.XY;
+    RENDERER.changeBasePlane(SETTING.planeType);
+})
+
+$('#planeYZ').change(function () {
+    SETTING.planeType = RENDERER.PLANE.YZ;
+    RENDERER.changeBasePlane(SETTING.planeType);
+})
+
+$('#planeZX').change(function () {
+    SETTING.planeType = RENDERER.PLANE.ZX;
+    RENDERER.changeBasePlane(SETTING.planeType);
+})
+
 export function bodyInit() {
     RENDERER.init();
     RENDERER.animate();
 
     document.getElementById("primitiveTriangles").checked = true;
+    SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
+
+    document.getElementById("planeXY").checked = true;
     SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
 }
 
