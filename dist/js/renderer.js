@@ -100,12 +100,12 @@ var GuiParams = function () {
     this.resetCamera = function () {
         resetCamera(boundingSphere);
     };
-    this.objectColor = '#aaccee';
+    this.objectColor = '#c0c0c0';
     this.meshMaterial = MESH_MATERIAL.BASIC;
 
-    this.lightColor = 0xffffff;
+    this.lightColor = '#ffffff';
     this.lightIntensity = 0.7;
-    this.ambientColor = 0x606060;
+    this.ambientColor = '#606060';
 
     // camera
     this.fov = 0;
@@ -166,7 +166,7 @@ export function init() {
     // Basic scene
     scene = new THREE.Scene();
 
-    polarGridHelper = new THREE.PolarGridHelper(1, 16, 8, 64, 0x444444, 0x888888);
+    polarGridHelper = new THREE.PolarGridHelper(1, 16, 8, 64, 0x404040, 0x808080);
 
     let qt = new THREE.Quaternion();
     qt.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(90));
@@ -183,7 +183,7 @@ export function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(surfaceWidth, surfaceHeight);
-    renderer.setClearColor(new THREE.Color(0x101020), 1.0);
+    renderer.setClearColor(new THREE.Color(0x303030), 1.0);
     renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
     renderer.setScissorTest(true);    
 
