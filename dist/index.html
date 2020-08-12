@@ -20,12 +20,21 @@
       width: auto;
     }
 
+    .link-icon {
+      height: 2em;
+      width: auto;
+    }
+
     .textarea-primitive {
       font-size: 0.75em;
     }
 
     .div-primitive {
       margin-top: 3em;
+    }
+
+    .ul-oss-shift {
+      margin-left: 0.5em;
     }
 
     #gl-container {
@@ -56,27 +65,7 @@
 
   <div class="container-fluid">
     <header>
-      <div class="collapse bg-dark" id="navbarHeader">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-sm-8 col-md-7 py-4">
-              <h4 class="text-white">About</h4>
-              <p class="text-white">
-                If you enter the 3D object information from the IDE Watch, it renders as a simple shape.
-                You can easily check the process.
-                No need for favorites/subscriptions/likes.
-              </p>
-            </div>
-            <div class="col-sm-4 offset-md-1 py-4">
-              <h4 class="text-white">Contact</h4>
-              <ul class="list-unstyled">
-                <li><a href="mailto:inverse.kr@outlook.com" class="text-white">Email me</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="navbar navbar-dark bg-dark shadow-sm">
+      <div class="navbar navbar-dark bg-dark shadow-sm rounded-top">
         <div class="container-fluid d-flex justify-content-between">
           <a href="#" class="navbar-brand d-flex align-items-center">
             <strong>Polygon watch</strong>
@@ -87,11 +76,31 @@
             <span class="navbar-toggler-icon"></span>
           </button>
         </div>
+      </div>      
+      <div class="collapse bg-dark" id="navbarHeader">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-8 col-md-7 py-4">
+              <h4 class="text-white">About</h4>
+              <p class="text-secondary">
+                If you enter the 3D object information from the IDE Watch, it renders as a simple shape.
+                You can easily check the process.
+                No need for favorites/subscriptions/likes.
+              </p>
+            </div>
+            <div class="col-sm-4 offset-md-1 py-4">
+              <h4 class="text-white">Contact</h4>
+              <ul class="list-unstyled">
+                <li><a href="mailto:inverse.kr@outlook.com" class="text-secondary">Email me</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
     <div id="gl-container">
-      <div id="gl-canvas">
+      <div id="gl-canvas" class="rounded-bottom">
       </div>
       <div id="gl-gui-bg">
         <div id="gl-gui">
@@ -265,7 +274,7 @@
 
           <!-- Content -->
           <h5 class="text-uppercase">POLYGON WATCH</h5>
-          <a href="https://github.com/kim-wooseok/polygonwatch" class="link">https://github.com/kim-wooseok/polygonwatch</a></li>
+          <a href="https://github.com/kim-wooseok/polygonwatch" target="_balnk"><img src="assets/images/icons/GitHub-Mark-64px.png" class="link-icon"></a></li>
         </div>
 
         <hr class="clearfix w-100 d-md-none pb-3">
@@ -274,13 +283,40 @@
         <div class="col-md-3 mb-md-0 mb-3">
 
           <!-- Links -->
-          <h5 class="text-uppercase">OSS Notice</h5>
-          <ul class="list-unstyled">
-            <li><a href="https://threejs.org/" class="link">three.js</a></li>
-            <li><a href="https://getbootstrap.com/" class="link">bootstrap</a></li>
-            <li><a href="https://github.com/dataarts/dat.gui" class="link">dat.gui</a></li>
-            <li><a href="https://jquery.com/" class="link">jQuery</a></li>
-          </ul>
+          <a class="btn btn-info" data-toggle="collapse" href="#collapseOSS" role="button" aria-expanded="false" aria-controls="collapseOSS">
+            OSS NOTICE
+          </a>
+          
+          <div class="collapse" id="collapseOSS">
+            <hr/>
+            <ul class="list-unstyled">
+              <li>three.js</li>
+              <ul class="list-unstyled ul-oss-shift">
+                <li><small><a href="https://threejs.org/" target="_balnk">https://threejs.org/</a></small></li>
+                <li><small>The MIT License</small></li>
+                <li><small>Copyright © 2010-2020 three.js authors</small></li>
+              </ul>
+              <li>Bootstrap</li>
+              <ul class="list-unstyled ul-oss-shift">
+                <li><small><a href="https://threejs.org/" target="_balnk">https://threejs.org/</a></small></li>
+                <li><small>The MIT License</small></li>
+                <li><small>Copyright (c) 2011-2018 Twitter, Inc.</small></li>
+                <li><small>Copyright (c) 2011-2018 The Bootstrap Authors</small></li>
+              </ul>
+              <li>dat.GUI</li>
+              <ul class="list-unstyled ul-oss-shift">
+                <li><small><a href="https://opensource.google/projects/datgui" target="_balnk">dat.GUI</a></small></li>
+                <li><small>Apache License Version 2.0</small></li>
+                <li><small>Copyright 2014, Google Inc.</small></li>
+              </ul>            
+              <li>jQuery</li>
+              <ul class="list-unstyled ul-oss-shift">
+                <li><small><a href="https://jquery.com/" target="_balnk">jQuery</a></small></li>
+                <li><small>The MIT License</small></li>
+                <li><small>Copyright 2020 The jQuery Foundation</small></li>
+              </ul>
+            </ul>
+          </div>
 
         </div>
 
@@ -288,16 +324,21 @@
         <div class="col-md-3 mb-md-0 mb-3">
 
           <!-- Links -->
-          <h5 class="text-uppercase">USEFUL LINKS</h5>
+          <a class="btn btn-info" data-toggle="collapse" href="#collapseLINKS" role="button" aria-expanded="false" aria-controls="collapseLINKS">
+            USEFUL LINKS
+          </a>
 
-          <ul class="list-unstyled">
-            <li><a href="https://www.youtube.com/playlist?list=PLv2d7VI9OotTVOL4QmPfvJWPJvkmv6h-2">자바스크립트 기초 강의 (ES5+) : Youtube</a></li>
-            <li><a href="https://developer.mozilla.org/ko/">MDN web docs</a></li>
-            <li><a href="https://www.pwabuilder.com/">PWA Builder</a></li>
-            <li><a href="https://www.jsdelivr.com/">jsDelivr</a></li>
-            <li><a href="https://regex101.com/" class="link">regular expressions 101</a></li>
-            <li><a href="https://regexper.com/" class="link">Regexper</a></li>
-          </ul>
+          <div class="collapse" id="collapseLINKS">
+            <hr/>
+            <ul class="list-unstyled">
+              <li><a href="https://www.youtube.com/playlist?list=PLv2d7VI9OotTVOL4QmPfvJWPJvkmv6h-2" target="_balnk">자바스크립트 기초 강의 (ES5+) : Youtube</a></li>
+              <li><a href="https://developer.mozilla.org/ko/" target="_balnk">MDN web docs</a></li>
+              <li><a href="https://www.pwabuilder.com/" target="_balnk">PWA Builder</a></li>
+              <li><a href="https://www.jsdelivr.com/" target="_balnk">jsDelivr</a></li>
+              <li><a href="https://regex101.com/" target="_balnk">regular expressions 101</a></li>
+              <li><a href="https://regexper.com/" target="_balnk">Regexper</a></li>
+            </ul>
+          </div>
 
         </div>
 
