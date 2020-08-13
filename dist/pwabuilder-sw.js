@@ -1,7 +1,7 @@
 // This is the "Offline copy of assets" service worker
 
 const CACHE = "pwabuilder-offline";
-const VERSION = "1.0.0.2"
+const VERSION = "1.0.0.3"
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.0.0/workbox-sw.js');
 
 self.addEventListener("message", (event) => {

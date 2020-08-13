@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="description" content="Render as a simple shape">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#f3f2f1"/>
+  <meta name="theme-color" content="#f3f2f1" />
   <link rel="icon" type="image/png" href="./favicon.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./favicon-highres.png" />
   <link rel="apple-touch-icon" href="./favicon-highres.png">
@@ -33,6 +34,10 @@
       margin-top: 3em;
     }
 
+    .footer_item {
+      margin-top: 1em;
+    }
+
     .ul-oss-shift {
       margin-left: 0.5em;
     }
@@ -44,7 +49,7 @@
     #gl-canvas {
       height: 50vh;
       resize: vertical;
-      overflow: hidden;      
+      overflow: hidden;
     }
 
     #gl-gui-bg {
@@ -69,14 +74,13 @@
         <div class="container-fluid d-flex justify-content-between">
           <a href="#" class="navbar-brand d-flex align-items-center">
             <strong>Polygon watch</strong>
-            <img src="favicon-192.png" class="title-icon"/>
+            <img src="favicon-192.png" class="title-icon" />
           </a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"
-            aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
         </div>
-      </div>      
+      </div>
       <div class="collapse bg-dark" id="navbarHeader">
         <div class="container-fluid">
           <div class="row">
@@ -192,9 +196,9 @@
             <div class="form-check form-check-inline">
               <input class="form-check-input" type="radio" name="planeType" id="planeZX">
               <label class="form-check-label" for="planeZX">ZX</label>
-            </div>            
+            </div>
           </div>
-        </div>        
+        </div>
       </div>
 
       <div class="form-row">
@@ -258,7 +262,7 @@
     </form>
   </div>
 
-  <hr/>
+  <hr />
 
   <!-- Footer -->
   <footer class="page-footer font-small blue pt-4">
@@ -274,7 +278,11 @@
 
           <!-- Content -->
           <h5 class="text-uppercase">POLYGON WATCH</h5>
-          <a href="https://github.com/kim-wooseok/polygonwatch" target="_balnk"><img src="assets/images/icons/GitHub-Mark-64px.png" class="link-icon"></a></li>
+          <ul class="list-unstyled footer_item">
+            <li><a href="https://github.com/kim-wooseok/polygonwatch" target="_balnk"><img src="assets/images/icons/GitHub-Mark-64px.png" class="link-icon"></a></li>
+            </li>
+          </ul>
+
         </div>
 
         <hr class="clearfix w-100 d-md-none pb-3">
@@ -286,34 +294,38 @@
           <a class="btn btn-info" data-toggle="collapse" href="#collapseOSS" role="button" aria-expanded="false" aria-controls="collapseOSS">
             OSS NOTICE
           </a>
-          
+
           <div class="collapse" id="collapseOSS">
-            <hr/>
-            <ul class="list-unstyled">
+
+            <ul class="list-unstyled footer_item">
               <li>three.js</li>
               <ul class="list-unstyled ul-oss-shift">
                 <li><small><a href="https://threejs.org/" target="_balnk">https://threejs.org/</a></small></li>
                 <li><small>The MIT License</small></li>
                 <li><small>Copyright © 2010-2020 three.js authors</small></li>
+                <br />
               </ul>
               <li>Bootstrap</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://threejs.org/" target="_balnk">https://threejs.org/</a></small></li>
+                <li><small><a href="https://getbootstrap.com/" target="_balnk">https://getbootstrap.com/</a></small></li>
                 <li><small>The MIT License</small></li>
                 <li><small>Copyright (c) 2011-2018 Twitter, Inc.</small></li>
                 <li><small>Copyright (c) 2011-2018 The Bootstrap Authors</small></li>
+                <br />
               </ul>
               <li>dat.GUI</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://opensource.google/projects/datgui" target="_balnk">dat.GUI</a></small></li>
+                <li><small><a href="https://opensource.google/projects/datgui/" target="_balnk">https://opensource.google/projects/datgui/</a></small></li>
                 <li><small>Apache License Version 2.0</small></li>
                 <li><small>Copyright 2014, Google Inc.</small></li>
-              </ul>            
+                <br />
+              </ul>
               <li>jQuery</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://jquery.com/" target="_balnk">jQuery</a></small></li>
+                <li><small><a href="https://jquery.com/" target="_balnk">https://jquery.com/</a></small></li>
                 <li><small>The MIT License</small></li>
                 <li><small>Copyright 2020 The jQuery Foundation</small></li>
+                <br />
               </ul>
             </ul>
           </div>
@@ -329,14 +341,17 @@
           </a>
 
           <div class="collapse" id="collapseLINKS">
-            <hr/>
-            <ul class="list-unstyled">
+            <ul class="list-unstyled footer_item">
               <li><a href="https://www.youtube.com/playlist?list=PLv2d7VI9OotTVOL4QmPfvJWPJvkmv6h-2" target="_balnk">자바스크립트 기초 강의 (ES5+) : Youtube</a></li>
               <li><a href="https://developer.mozilla.org/ko/" target="_balnk">MDN web docs</a></li>
               <li><a href="https://www.pwabuilder.com/" target="_balnk">PWA Builder</a></li>
               <li><a href="https://www.jsdelivr.com/" target="_balnk">jsDelivr</a></li>
+              <li><a href="https://regexr.com/" target="_balnk">RegExr</a></li>
               <li><a href="https://regex101.com/" target="_balnk">regular expressions 101</a></li>
               <li><a href="https://regexper.com/" target="_balnk">Regexper</a></li>
+              <li><small><a href="https://www.oss.kr/qna/show/8fd30d94-f967-4e60-9f38-72ab92d14356" target="_balnk" class="text-muted">직원 오픈소스 프로젝트에 ...</a></small></li>
+              <li><a href="https://opensource.guide/ko/starting-a-project/" target="_balnk">오픈소스 프로젝트 시작하기</a></li>
+              <li><a href="https://naver.github.io/OpenSourceGuide/book/OpenYourProject/starting-an-open-source-project.html" target="_balnk">오픈소스 프로젝트 공개하기</a></li>
             </ul>
           </div>
 
@@ -347,8 +362,8 @@
     </div>
 
     <!-- Copyright -->
-    <div class="footer-copyright text-center py-3">© 2020 Copyright:
-      <a href="http://inverse.kr/"> inverse.kr</a>
+    <div class="footer-copyright text-center py-3">Copyright © 2020
+      <a href="http://inverse.kr/">inverse.kr</a>
     </div>
   </footer>
 
@@ -362,7 +377,7 @@
 
   const el = document.createElement('pwa-update');
   document.body.appendChild(el);
-  
+
   MAIN.bodyInit();
 </script>
 
