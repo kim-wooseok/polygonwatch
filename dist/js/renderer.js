@@ -6,7 +6,12 @@ import * as dat from 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.m
 import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/controls/TrackballControls.js'
 import * as UTIL from './util.js'
 
-export const PRIMITIVE = class {
+export const PRIMITIVE_MODE = class {
+    static get D3D() { return 100; }
+    static get D2D() { return 200; }
+};
+
+export const PRIMITIVE_TYPE = class {
     static get POINTS() { return 1; }
     static get LINES() { return 2; }
     static get TRIANGLES() { return 3; }
@@ -532,7 +537,7 @@ export function loadUserMesh(vertices, indices, normals, colors, vertexSize, pri
         geometry.setAttribute('normal', new THREE.BufferAttribute(floatNormals, vertexSize));
     }
     else {
-        if (PRIMITIVE.TRIANGLES == primitiveType) {
+        if (PRIMITIVE_TYPE.TRIANGLES == primitiveType) {
             geometry.computeVertexNormals();
         }
     }
@@ -545,10 +550,10 @@ export function loadUserMesh(vertices, indices, normals, colors, vertexSize, pri
     geometry.computeBoundingSphere();
 
     let mesh = new THREE.Mesh();
-    if (PRIMITIVE.POINTS === primitiveType) {
+    if (PRIMITIVE_TYPE.POINTS === primitiveType) {
         mesh = new THREE.Points(geometry);
     }
-    else if (PRIMITIVE.LINES === primitiveType) {
+    else if (PRIMITIVE_TYPE.LINES === primitiveType) {
         mesh = new THREE.LineSegments(geometry);
     }
     else {
@@ -557,10 +562,10 @@ export function loadUserMesh(vertices, indices, normals, colors, vertexSize, pri
 
     let materialType = MESH_MATERIAL.NORMAL;
     // Meterial
-    if (PRIMITIVE.POINTS === primitiveType) {
+    if (PRIMITIVE_TYPE.POINTS === primitiveType) {
         materialType = MESH_MATERIAL.POINTS;
     }
-    else if (PRIMITIVE.LINES === primitiveType) {
+    else if (PRIMITIVE_TYPE.LINES === primitiveType) {
         materialType = MESH_MATERIAL.LINEBASIC;
     }
     else {

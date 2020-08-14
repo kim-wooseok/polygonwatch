@@ -2,10 +2,26 @@
 import * as RENDERER from './renderer.js'
 import {loadTestData} from './test.js'
 
-var SETTING = {
-    primitiveType: RENDERER.PRIMITIVE.TRIANGLES,
-    planeType: RENDERER.PLANE.XY
-};
+class PrimitiveElements {
+    constructor() {
+        this.mode3D = $("#primitive3D")[0];
+        this.mode2D = $("#primitive2D")[0];
+
+        this.indices = $("#useIndices")[0];
+        this.normals = $("#useNormals")[0];
+        this.colors = $("#useColors")[0];
+
+        this.typePoints = $("#primitivePoints")[0];
+        this.typeLines = $("#primitiveLines")[0];
+        this.typeTriangles = $("#primitiveTriangles")[0];
+
+        this.planeXY = $("#planeXY")[0];
+        this.planeYZ = $("#planeYZ")[0];
+        this.planeZX = $("#planeZX")[0];
+    }
+}
+
+var primitiveElements = new PrimitiveElements();
 
 var regexFormat, regexGroup;
 
@@ -17,23 +33,41 @@ $("#runButton").click(function () {
     let indices;
     let normals;
     let colors;
-    let useIndices = document.getElementById("useIndices").checked;
-    let useNormals = document.getElementById("useNormals").checked;
-    let useColors = document.getElementById("useColors").checked;
 
     setRegExp();
     vertices = parseVertices();
-    if (true === useIndices) {
+    if (true === primitiveElements.mode2D.checked) {
+        let vertices2D = new Array();
+        for (let i = 0; i < vertices.length; i += 2) {
+            vertices2D.push(vertices[i+0]);
+            vertices2D.push(vertices[i+1]);
+            vertices2D.push("0");
+        }
+        vertices = vertices2D;
+    }
+
+    if (true === primitiveElements.indices.checked) {
         indices = parseIndices();
     }
-    if (true === useNormals) {
+    if (true === primitiveElements.normals.checked) {
         normals = parseNormals();
     }
-    if (true === useColors) {
+    if (true === primitiveElements.colors.checked) {
         colors = parseColors();
     }
 
-    RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, SETTING.primitiveType);
+    let primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
+    if (true === primitiveElements.typePoints.checked) {
+        primitiveType = RENDERER.PRIMITIVE_TYPE.POINTS;
+    }
+    else if (true === primitiveElements.typeLines.checked) {
+        primitiveType = RENDERER.PRIMITIVE_TYPE.LINES;
+    }
+    else {
+        primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
+    }
+
+    RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primitiveType);
 });
 
 $("#clearButton").click(function () {
@@ -77,42 +111,45 @@ $('#regexSelect').on('change', function () {
     }
 });
 
-$('#primitivePoints').change(function () {
-    SETTING.primitiveType = RENDERER.PRIMITIVE.POINTS;
+$('#primitive3D').change(function () {
+    primitiveElements.normals.disabled = false;
+    primitiveElements.typeTriangles.disabled = false;
 })
 
-$('#primitiveLines').change(function () {
-    SETTING.primitiveType = RENDERER.PRIMITIVE.LINES;
-})
-
-$('#primitiveTriangles').change(function () {
-    SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
+$('#primitive2D').change(function () {
+    if (true === primitiveElements.normals.checked)
+    {
+        primitiveElements.normals.checked = false;
+    }
+    if (true === primitiveElements.typeTriangles.checked)
+    {
+        primitiveElements.typeLines.checked = true;
+    }
+    primitiveElements.normals.disabled = true;
+    primitiveElements.typeTriangles.disabled = true;
 })
 
 $('#planeXY').change(function () {
-    SETTING.planeType = RENDERER.PLANE.XY;
-    RENDERER.changeBasePlane(SETTING.planeType);
+    RENDERER.changeBasePlane(RENDERER.PLANE.XY);
 })
 
 $('#planeYZ').change(function () {
-    SETTING.planeType = RENDERER.PLANE.YZ;
-    RENDERER.changeBasePlane(SETTING.planeType);
+    RENDERER.changeBasePlane(RENDERER.PLANE.YZ);
 })
 
 $('#planeZX').change(function () {
-    SETTING.planeType = RENDERER.PLANE.ZX;
-    RENDERER.changeBasePlane(SETTING.planeType);
+    RENDERER.changeBasePlane(RENDERER.PLANE.ZX);
 })
 
 export function bodyInit() {
     RENDERER.init();
     RENDERER.animate();
 
+    document.getElementById("primitive3D").checked = true;
+
     document.getElementById("primitiveTriangles").checked = true;
-    SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
 
     document.getElementById("planeXY").checked = true;
-    SETTING.primitiveType = RENDERER.PRIMITIVE.TRIANGLES;
 }
 
 function setRegExp() {
