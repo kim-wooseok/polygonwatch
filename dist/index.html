@@ -118,7 +118,7 @@
           </div>
         </div>
         <div id="gl-gui-fullscreen">
-          <button class="btn btn-default btn-sm" type="button" title="fullscreen">
+          <button class="btn btn-default" type="button" data-toggle="tooltip" data-placement="left" title="fullscreen">
             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-fullscreen" fill="#d0d0d0" xmlns="http://www.w3.org/2000/svg" id="svg-fullscreen">
               <path fill-rule="evenodd"
                 d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z" />
@@ -131,31 +131,37 @@
         </div>
       </div>
     </div>
-    <hr />
+    <div>
+      <a class="btn btn-link btn-sm" href="https://github.com/kim-wooseok/polygonwatch/" target="_blank">How to use?</a>
+    </div>
     <div>
       <div class="form-group row">
         <div class="col-md">
-          <button class="btn btn-secondary btn-lg btn-block" type="button" id="testButton">TEST</button>
+          <button class="btn btn-secondary btn-block" type="button" id="testButton">TEST</button>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-md">
-          <button class="btn btn-danger btn-lg btn-block" type="button" id="clearButton">CLEAR TEXT</button>
+          <button class="btn btn-danger btn-block" type="button" id="clearButton">CLEAR TEXT</button>
         </div>
         <div class="col-md">
-          <button class="btn btn-primary btn-lg btn-block" type="button" id="clearScene">CLEAR SCENE</button>
+          <button class="btn btn-primary btn-block" type="button" id="clearScene">CLEAR SCENE</button>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-md">
-          <button class="btn btn-success btn-lg btn-block" type="button" id="runButton">RUN</button>
+          <button class="btn btn-success btn-block" type="button" id="runButton">RUN</button>
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-md">
-          <label for="loadFilesButton">Select a 3D model(fbx/collada file and texture images)</label>
-          <input type="file" class="form-control-file" name="files[]" multiple="" id="loadFilesButton">
-        </div>
+        <form class="col-md">
+          <div class="custom-file">
+            <label class="custom-file-label" for="loadFilesButton">
+              <small>fbx/collada file and texture images</small>
+            </label>           
+            <input class="custom-file-input" type="file"  name="files[]" multiple="" id="loadFilesButton">
+          </div>
+        </form>
       </div>
 
     </div>
@@ -311,7 +317,7 @@
           <!-- Content -->
           <h5 class="text-uppercase">POLYGON WATCH</h5>
           <ul class="list-unstyled footer_item">
-            <li><a href="https://github.com/kim-wooseok/polygonwatch" target="_balnk"><img src="assets/images/icons/GitHub-Mark-64px.png" class="link-icon"></a></li>
+            <li><a href="https://github.com/kim-wooseok/polygonwatch" target="_blank"><img src="assets/images/icons/GitHub-Mark-64px.png" class="link-icon"></a></li>
             </li>
           </ul>
 
@@ -332,14 +338,14 @@
             <ul class="list-unstyled footer_item">
               <li>three.js</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://threejs.org/" target="_balnk">https://threejs.org/</a></small></li>
+                <li><small><a href="https://threejs.org/" target="_blank">https://threejs.org/</a></small></li>
                 <li><small>The MIT License</small></li>
                 <li><small>Copyright © 2010-2020 three.js authors</small></li>
                 <br />
               </ul>
               <li>Bootstrap</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://getbootstrap.com/" target="_balnk">https://getbootstrap.com/</a></small></li>
+                <li><small><a href="https://getbootstrap.com/" target="_blank">https://getbootstrap.com/</a></small></li>
                 <li><small>The MIT License</small></li>
                 <li><small>Copyright (c) 2011-2018 Twitter, Inc.</small></li>
                 <li><small>Copyright (c) 2011-2018 The Bootstrap Authors</small></li>
@@ -347,21 +353,21 @@
               </ul>
               <li>jQuery</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://jquery.com/" target="_balnk">https://jquery.com/</a></small></li>
+                <li><small><a href="https://jquery.com/" target="_blank">https://jquery.com/</a></small></li>
                 <li><small>The MIT License</small></li>
                 <li><small>Copyright 2020 The jQuery Foundation</small></li>
                 <br />
               </ul>
               <li>dat.GUI</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://opensource.google/projects/datgui/" target="_balnk">https://opensource.google/projects/datgui/</a></small></li>
+                <li><small><a href="https://opensource.google/projects/datgui/" target="_blank">https://opensource.google/projects/datgui/</a></small></li>
                 <li><small>Apache License Version 2.0</small></li>
                 <li><small>Copyright 2014, Google Inc.</small></li>
                 <br />
               </ul>
               <li>screenfull.js</li>
               <ul class="list-unstyled ul-oss-shift">
-                <li><small><a href="https://sindresorhus.com/screenfull.js/" target="_balnk">https://sindresorhus.com/screenfull.js/</a></small></li>
+                <li><small><a href="https://sindresorhus.com/screenfull.js/" target="_blank">https://sindresorhus.com/screenfull.js/</a></small></li>
                 <li><small>The MIT License</small></li>
                 <li><small>Copyright (c) Sindre Sorhus <a href="sindresorhus@gmail.com" class="text-muted">sindresorhus@gmail.com</a> (sindresorhus.com)</small></li>
                 <br />
@@ -382,17 +388,17 @@
 
           <div class="collapse" id="collapseLINKS">
             <ul class="list-unstyled footer_item">
-              <li><a href="https://www.youtube.com/playlist?list=PLv2d7VI9OotTVOL4QmPfvJWPJvkmv6h-2" target="_balnk">자바스크립트 기초 강의 (ES5+) : Youtube</a></li>
-              <li><a href="https://developer.mozilla.org/ko/" target="_balnk">MDN web docs</a></li>
-              <li><a href="https://docs.microsoft.com/ko-kr/azure/static-web-apps/overview" target="_balnk">Azure Static Web Apps 미리 보기란?</a></li>
-              <li><a href="https://www.pwabuilder.com/" target="_balnk">PWA Builder</a></li>
-              <li><a href="https://www.jsdelivr.com/" target="_balnk">jsDelivr</a></li>
-              <li><a href="https://regexr.com/" target="_balnk">RegExr</a></li>
-              <li><a href="https://regex101.com/" target="_balnk">regular expressions 101</a></li>
-              <li><a href="https://regexper.com/" target="_balnk">Regexper</a></li>
-              <li><small><a href="https://www.oss.kr/qna/show/8fd30d94-f967-4e60-9f38-72ab92d14356" target="_balnk" class="text-muted">직원 오픈소스 프로젝트에 ...</a></small></li>
-              <li><a href="https://opensource.guide/ko/starting-a-project/" target="_balnk">오픈소스 프로젝트 시작하기</a></li>
-              <li><a href="https://naver.github.io/OpenSourceGuide/book/OpenYourProject/starting-an-open-source-project.html" target="_balnk">오픈소스 프로젝트 공개하기</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLv2d7VI9OotTVOL4QmPfvJWPJvkmv6h-2" target="_blank">자바스크립트 기초 강의 (ES5+) : Youtube</a></li>
+              <li><a href="https://developer.mozilla.org/ko/" target="_blank">MDN web docs</a></li>
+              <li><a href="https://docs.microsoft.com/ko-kr/azure/static-web-apps/overview" target="_blank">Azure Static Web Apps 미리 보기란?</a></li>
+              <li><a href="https://www.pwabuilder.com/" target="_blank">PWA Builder</a></li>
+              <li><a href="https://www.jsdelivr.com/" target="_blank">jsDelivr</a></li>
+              <li><a href="https://regexr.com/" target="_blank">RegExr</a></li>
+              <li><a href="https://regex101.com/" target="_blank">regular expressions 101</a></li>
+              <li><a href="https://regexper.com/" target="_blank">Regexper</a></li>
+              <li><small><a href="https://www.oss.kr/qna/show/8fd30d94-f967-4e60-9f38-72ab92d14356" target="_blank" class="text-muted">직원 오픈소스 프로젝트에 ...</a></small></li>
+              <li><a href="https://opensource.guide/ko/starting-a-project/" target="_blank">오픈소스 프로젝트 시작하기</a></li>
+              <li><a href="https://naver.github.io/OpenSourceGuide/book/OpenYourProject/starting-an-open-source-project.html" target="_blank">오픈소스 프로젝트 공개하기</a></li>
             </ul>
           </div>
 
@@ -420,6 +426,23 @@
   // PWA
   const el = document.createElement('pwa-update');
   document.body.appendChild(el);
+
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
+
+
+  $(".custom-file-input").on("change", function (ev) {
+    let names = "";
+    for (var i = 0; i < ev.currentTarget.files.length; i++) {
+      let file = ev.currentTarget.files[i];
+      names += file.name;
+      if (i !== ev.currentTarget.files.length - 1) {
+        names += ", ";
+      }
+    }
+    $(this).siblings(".custom-file-label").addClass("selected").html(names);
+  });
 
   MAIN.bodyInit();
 </script>
