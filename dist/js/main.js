@@ -21,7 +21,16 @@ class PrimitiveElements {
     }
 }
 
+class CanvasElements {
+    constructor() {
+        this.canvas = $('#gl-canvas')[0];
+        this.fullscreen = $('#svg-fullscreen')[0];
+        this.fullscreenExit = $('#svg-fullscreen-exit')[0];
+    }
+}
+
 var primitiveElements = new PrimitiveElements();
+var canvasElements = new CanvasElements();
 
 var regexFormat, regexGroup;
 
@@ -141,15 +150,29 @@ $('#planeZX').change(function () {
     RENDERER.changeBasePlane(RENDERER.PLANE.ZX);
 })
 
+$('#gl-gui-fullscreen').on('click', () => {
+    if (screenfull.isEnabled) {
+        screenfull.toggle(canvasElements.canvas);
+    }
+});
+
+screenfull.on('change', () => {
+    if (screenfull.isFullscreen) {
+        canvasElements.fullscreen.style.display = "none";
+        canvasElements.fullscreenExit.style.display = "block";
+    } else {
+        canvasElements.fullscreen.style.display = "block";
+        canvasElements.fullscreenExit.style.display = "none";
+    }
+});
+
 export function bodyInit() {
+    primitiveElements.mode3D.checked = true;
+    primitiveElements.typeTriangles.checked = true;
+    primitiveElements.planeXY.checked = true;
+
     RENDERER.init();
     RENDERER.animate();
-
-    document.getElementById("primitive3D").checked = true;
-
-    document.getElementById("primitiveTriangles").checked = true;
-
-    document.getElementById("planeXY").checked = true;
 }
 
 function setRegExp() {

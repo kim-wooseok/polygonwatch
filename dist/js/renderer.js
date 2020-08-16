@@ -268,24 +268,26 @@ function createAxes(axesScale, pos) {
 
 function initGUI() {
     gui = new dat.GUI({ autoPlace: true });
+
+    gui.add(guiParams, 'resetCamera').name('reset camera');
+
     gui.add(guiParams, 'wireframe').onChange(function (val) {
         materialList.forEach(function (mat) {
             mat.wireframe = val;
         });
     });
 
-    gui.addColor(guiParams, 'objectColor').name('color').onChange(function (val) {
-        materialList.forEach(function (mat) {
-            mat.color = new THREE.Color(val);
-        });
-    });
-
-    gui.add(guiParams, 'resetCamera').name('reset camera');
-
     let fMat = gui.addFolder('Materials');
-    fMat.add(guiParams, 'meshMaterial', MESH_MATERIAL).name('mesh materials').onChange(function (val) {
-        updateMeshMaterial(parseInt(val));
-    });
+    {
+        fMat.addColor(guiParams, 'objectColor').name('color').onChange(function (val) {
+            materialList.forEach(function (mat) {
+                mat.color = new THREE.Color(val);
+            });
+        });
+        fMat.add(guiParams, 'meshMaterial', MESH_MATERIAL).name('mesh materials').onChange(function (val) {
+            updateMeshMaterial(parseInt(val));
+        });
+    }
     fMat.open();
 
     let fProp = gui.addFolder('Properties');
