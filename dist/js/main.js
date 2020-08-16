@@ -34,7 +34,7 @@ var canvasElements = new CanvasElements();
 
 var regexFormat, regexGroup;
 
-var REGEX_VS = "(?:[=\\]]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
+var REGEX_VS = "(?:[=\\]\\),]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
 var REGEX_CSV = "([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d)";
 
 $("#runButton").click(function () {
