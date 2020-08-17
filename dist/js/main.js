@@ -164,6 +164,8 @@ screenfull.on('change', () => {
         canvasElements.fullscreen.style.display = "block";
         canvasElements.fullscreenExit.style.display = "none";
     }
+
+    RENDERER.resetViewport();
 });
 
 export function bodyInit() {

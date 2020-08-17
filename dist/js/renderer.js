@@ -152,7 +152,7 @@ var materialList = new Array();
 var groupList = new Array();
 
 var directionalLight, ambientLight;
-var targetSurface;
+export var targetSurface;
 var gui, controls;
 var polarGridHelper;
 var lookatObject, lookatPos, viewPos;
@@ -378,7 +378,7 @@ export function animate() {
     renderer.render(scene, camera);
 }
 
-function resetViewport() {
+export function resetViewport() {
     let surfaceWidth = targetSurface.clientWidth;
     let surfaceHeight = targetSurface.clientHeight;
 
