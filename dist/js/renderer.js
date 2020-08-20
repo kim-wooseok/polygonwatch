@@ -201,10 +201,25 @@ export function init() {
     controls.zoomSpeed = 1.2;
     controls.panSpeed = 0.8;
 
-    createDefaultBox();
+    let meshAndMaeterial = createDefaultBox();
+    let group = new THREE.Group();
+    // group
+    group.add(meshAndMaeterial[0]);
+    scene.add(group);
+
+    // add to global container
+    groupList.push(group);
+    materialList.push(meshAndMaeterial[1]);
+    meshList.push(meshAndMaeterial[0]);
+
     resetBoundingSphere(meshList);
     resetCamera(boundingSphere);
     resetHelper(boundingSphere);
+
+    // axes
+    let axes = createAxes(boundingSphere.radius, boundingSphere.center);
+    group.add(axes[0]);
+    group.add(axes[1]);    
 
     guiParams = new GuiParams();
     guiParams.lightColor = directionalLight.color.getHex();
@@ -230,27 +245,16 @@ export function changeBasePlane(planeType) {
 }
 
 function createDefaultBox() {
-    let group = new THREE.Group();
-
     let geometry = new THREE.BoxGeometry(0.75, 0.75, 0.75);
     geometry.computeBoundingSphere();
+    geometry.computeBoundingBox();
     let material = new THREE.MeshNormalMaterial();
     let mesh = new THREE.Mesh(geometry, material);
+    mesh.scale.set(1, 1.5, 0.5);
+    mesh.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 4);
+    mesh.position.set(0, 0, 0.5);
 
-    // axes
-    let axes = createAxes(geometry.boundingSphere.radius, geometry.boundingSphere.center);
-
-    // group
-    group.add(mesh);
-    group.add(axes[0]);
-    group.add(axes[1]);
-
-    scene.add(group);
-
-    // add to global container
-    groupList.push(group);
-    materialList.push(material);
-    meshList.push(mesh);
+    return [mesh, material];
 }
 
 function createAxes(axesScale, pos) {
@@ -455,29 +459,21 @@ export function clearScene() {
 }
 
 function resetBoundingSphere(meshList) {
-    boundingSphere = new THREE.Sphere();
-
-    meshList.forEach(function(mesh) {
-        let scale = (mesh.scale.x + mesh.scale.y + mesh.scale.z) / 3;
-        let center = mesh.geometry.boundingSphere.center.clone().multiply(mesh.scale);
-        let radius = mesh.geometry.boundingSphere.radius * scale; 
-
-        if (boundingSphere.isEmpty()) {
-            boundingSphere.set(center, radius);        
-        }
-        else {
-            let d = boundingSphere.center.distanceTo(center);
-
-            if (d + radius <= boundingSphere.radius) {
-                // do nothing.                
-            } else {    
-                let r = Math.max(boundingSphere.radius, radius);
-                let newcenter = boundingSphere.center.clone().add(center).multiplyScalar(0.5);
-                let newradius = d / 2 + r; 
-                boundingSphere.set(newcenter, newradius);
-            }
-        }
+    let boxList = new Array();
+    meshList.forEach(function (mesh) {
+        mesh.updateWorldMatrix(true, false);
+        let box = new THREE.Box3();
+        box.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
+        boxList.push(box);
     });
+
+    let boxAll = new THREE.Box3();
+    boxList.forEach(function (box) {
+        boxAll.union(box);
+    });
+
+    boundingSphere = new THREE.Sphere();
+    boxAll.getBoundingSphere(boundingSphere);
 }
 
 function resetCamera(sphere) {
@@ -550,6 +546,7 @@ export function loadUserMesh(vertices, indices, normals, colors, vertexSize, pri
     }
 
     geometry.computeBoundingSphere();
+    geometry.computeBoundingBox();
 
     let mesh = new THREE.Mesh();
     if (PRIMITIVE_TYPE.POINTS === primitiveType) {
@@ -584,13 +581,8 @@ export function loadUserMesh(vertices, indices, normals, colors, vertexSize, pri
         }
     }
 
-    // axes
-    let axes = createAxes(geometry.boundingSphere.radius, geometry.boundingSphere.center);
-
     let group = new THREE.Group();
     group.add(mesh);
-    group.add(axes[0]);
-    group.add(axes[1]);
     scene.add(group);
 
     // add to global container
@@ -603,6 +595,11 @@ export function loadUserMesh(vertices, indices, normals, colors, vertexSize, pri
     resetBoundingSphere(meshList);
     resetCamera(boundingSphere);
     resetHelper(boundingSphere);
+
+    // axes
+    let axes = createAxes(geometry.boundingSphere.radius, geometry.boundingSphere.center);
+    group.add(axes[0]);
+    group.add(axes[1]);
 
     // udpate gui
     guiParams.meshMaterial = materialType;
@@ -685,12 +682,17 @@ export function loadCollada(files) {
                     materialList.push(child.material);
                 }
                 child.geometry.computeBoundingSphere();
+                child.geometry.computeBoundingBox();
                 modelMeshList.push(child);
             }
         });
 
         scene.add(modelGroup);
-        groupList.push(modelGroup);
+        let group = new THREE.Group();
+        scene.add(group);
+
+        groupList.push(modelGroup);        
+        groupList.push(group);
 
         resetBoundingSphere(modelMeshList);
         resetCamera(boundingSphere);
@@ -698,11 +700,8 @@ export function loadCollada(files) {
 
         // axes
         let axes = createAxes(boundingSphere.radius, boundingSphere.center);
-        let group = new THREE.Group();
         group.add(axes[0]);
         group.add(axes[1]);
-        scene.add(group);
-        groupList.push(group);
     });    
 }
 
