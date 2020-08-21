@@ -4,6 +4,7 @@ import { ColladaLoader } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/exampl
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js'
 import * as dat from 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js'
 import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/controls/TrackballControls.js'
+import { CenterHelper } from './helper.js'
 import * as UTIL from './util.js'
 
 export const PRIMITIVE_MODE = class {
@@ -154,7 +155,7 @@ var groupList = new Array();
 var directionalLight, ambientLight;
 export var targetSurface;
 var gui, controls;
-var polarGridHelper;
+var centerHelper, gridHelper;
 var lookatObject, lookatPos, viewPos;
 var boundingSphere;
 const manager = new THREE.LoadingManager();
@@ -171,13 +172,7 @@ export function init() {
     // Basic scene
     scene = new THREE.Scene();
 
-    polarGridHelper = new THREE.PolarGridHelper(1, 16, 8, 64, 0x404040, 0x808080);
-
-    let qt = new THREE.Quaternion();
-    qt.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(90));
-    polarGridHelper.applyQuaternion(qt); 
-    scene.add(polarGridHelper)
-
+    // Light
     directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
     directionalLight.target = lookatObject;
     scene.add(directionalLight);
@@ -196,6 +191,7 @@ export function init() {
     targetSurface.appendChild(renderer.domElement);
     window.addEventListener('resize', onWindowResize, false);
 
+    // Control
     controls = new TrackballControls(camera, renderer.domElement);
     controls.rotateSpeed = 4.0;
     controls.zoomSpeed = 1.2;
@@ -203,7 +199,6 @@ export function init() {
 
     let meshAndMaeterial = createDefaultBox();
     let group = new THREE.Group();
-    // group
     group.add(meshAndMaeterial[0]);
     scene.add(group);
 
@@ -211,6 +206,17 @@ export function init() {
     groupList.push(group);
     materialList.push(meshAndMaeterial[1]);
     meshList.push(meshAndMaeterial[0]);
+
+    // helper
+    gridHelper = new THREE.PolarGridHelper(2, 32, 8, 64, 0x404040, 0x808080);
+    //gridHelper = new THREE.GridHelper(64, 64, 0x404040, 0x808080);
+    let qt = new THREE.Quaternion();
+    qt.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(90));
+    gridHelper.applyQuaternion(qt); 
+    scene.add(gridHelper);
+
+    centerHelper = new CenterHelper(controls);
+    scene.add(centerHelper.group);
 
     resetBoundingSphere(meshList);
     resetCamera(boundingSphere);
@@ -237,11 +243,11 @@ export function init() {
 
 export function changeBasePlane(planeType) {
     BasePlane = new WorldPlane(planeType);
-    polarGridHelper.quaternion.set(0,0,0,1);
+    gridHelper.quaternion.set(0,0,0,1);
 
     let qt = new THREE.Quaternion();
-    qt.setFromUnitVectors(polarGridHelper.up, BasePlane.normal);
-    polarGridHelper.applyQuaternion(qt); 
+    qt.setFromUnitVectors(gridHelper.up, BasePlane.normal);
+    gridHelper.applyQuaternion(qt); 
 }
 
 function createDefaultBox() {
@@ -365,6 +371,7 @@ function onWindowResize() {
 export function animate() {
     requestAnimationFrame(animate);
     controls.update();
+    centerHelper.update();
 
     let lookAtVector = new THREE.Vector3(0, 0, 1);
     let euler = new THREE.Euler(THREE.Math.degToRad(-15), THREE.Math.degToRad(-30), 0);
@@ -512,7 +519,7 @@ function resetCamera(sphere) {
 
 function resetHelper(sphere) {
     let gridScale = sphere.radius * 1.5;
-    polarGridHelper.scale.set(gridScale, gridScale, gridScale);
+    gridHelper.scale.set(gridScale, gridScale, gridScale);
 }
 
 export function loadUserMesh(vertices, indices, normals, colors, vertexSize, primitiveType) {
