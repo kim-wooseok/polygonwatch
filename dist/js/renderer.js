@@ -4,6 +4,7 @@ import { ColladaLoader } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/exampl
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js'
 import * as dat from 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js'
 import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/controls/TrackballControls.js'
+import { OrbitControls } from './three.js/examples/jsm/controls/OrbitControls.js'
 import { CenterHelper } from './helper.js'
 import * as UTIL from './util.js'
 
@@ -192,10 +193,12 @@ export function init() {
     window.addEventListener('resize', onWindowResize, false);
 
     // Control
-    controls = new TrackballControls(camera, renderer.domElement);
-    controls.rotateSpeed = 4.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.8;
+    //controls = new TrackballControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
+    //controls.rotateSpeed = 4.0;
+    //controls.zoomSpeed = 1.2;
+    //controls.panSpeed = 0.8;
+    controls.up = BasePlane.normal;
 
     let meshAndMaeterial = createDefaultBox();
     let group = new THREE.Group();
@@ -248,6 +251,8 @@ export function changeBasePlane(planeType) {
     let qt = new THREE.Quaternion();
     qt.setFromUnitVectors(gridHelper.up, BasePlane.normal);
     gridHelper.applyQuaternion(qt); 
+
+    resetCamera(boundingSphere);
 }
 
 function createDefaultBox() {
@@ -504,16 +509,12 @@ function resetCamera(sphere) {
     let up = BasePlane.normal.clone();
     //up.applyQuaternion(qt);
 
-    camera.position.x = position.x;
-    camera.position.y = position.y;
-    camera.position.z = position.z;
-    camera.up.x = up.x;
-    camera.up.y = up.y;
-    camera.up.z = up.z;
+    camera.position.copy(position);
+    camera.up.copy(up);
     camera.lookAt(lookatPos.clone());
     camera.far = Math.max(sphere.radius * 6, 2000);
     camera.updateProjectionMatrix();
-    controls.target.set(lookatPos.x, lookatPos.y, lookatPos.z);
+    controls.target.copy(lookatPos);
     controls.update();
 }
 
