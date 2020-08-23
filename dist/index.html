@@ -431,7 +431,6 @@
     $('[data-toggle="tooltip"]').tooltip()
   })
 
-
   $(".custom-file-input").on("change", function (ev) {
     let names = "";
     for (var i = 0; i < ev.currentTarget.files.length; i++) {
@@ -444,7 +443,7 @@
     $(this).siblings(".custom-file-label").addClass("selected").html(names);
   });
 
-  MAIN.bodyInit();
+  MAIN.bodyInit(screenfull);
 </script>
 
 </html>

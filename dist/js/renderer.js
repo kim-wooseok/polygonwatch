@@ -1,726 +1,744 @@
-'use strict';
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.module.js'
-import { ColladaLoader } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/ColladaLoader.js'
-import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js'
-import * as dat from 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js'
-import { TrackballControls } from 'https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/controls/TrackballControls.js'
-import { OrbitControls } from './three.js/examples/jsm/controls/OrbitControls.js'
-import { CenterHelper } from './helper.js'
-import * as UTIL from './util.js'
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.module.js";
+import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/ColladaLoader.js";
+import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js";
+import * as dat from "https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js";
+import { OrbitControls } from "./three.js/examples/jsm/controls/OrbitControls.js";
+import { CenterHelper } from "./helper.js";
+import * as UTIL from "./util.js";
 
-export const PRIMITIVE_MODE = class {
-    static get D3D() { return 100; }
-    static get D2D() { return 200; }
+export const PRIMITIVE_MODE = {
+  D3D: 100,
+  D2D: 200,
 };
 
-export const PRIMITIVE_TYPE = class {
-    static get POINTS() { return 1; }
-    static get LINES() { return 2; }
-    static get TRIANGLES() { return 3; }
+export const PRIMITIVE_TYPE = {
+  POINTS: 1,
+  LINES: 2,
+  TRIANGLES: 3,
 };
 
-export const PLANE = class {
-    static get XY() { return 10; }
-    static get YZ() { return 20; }
-    static get ZX() { return 30; }
+export const PLANE = {
+  XY: "XY",
+  YZ: "YZ",
+  ZX: "ZX",
 };
-
-class WorldPlane{
-    constructor(planeType) {
-        this.planeType = planeType;
-    }
-
-    get type() {
-        return this.planeType;
-    }
-
-    get normal() {
-        let axis;
-        switch(this.planeType) {
-        case PLANE.XY:
-            axis = new THREE.Vector3(0, 0, 1);
-            break;
-        case PLANE.YZ:
-            axis = new THREE.Vector3(1, 0, 0);
-            break;            
-        case PLANE.ZX:
-            axis = new THREE.Vector3(0, 1, 0);
-            break;
-        default:
-            axis = new THREE.Vector3(0, 0, 1);
-            break;
-        }
-        return axis;
-    }
-
-    get forward() {
-        let axis;
-        switch(this.planeType) {
-        case PLANE.XY:
-            axis = new THREE.Vector3(0, 1, 0);
-            break;
-        case PLANE.YZ:
-            axis = new THREE.Vector3(0, 0, 1);
-            break;    
-        case PLANE.ZX:
-            axis = new THREE.Vector3(1, 0, 0);
-            break;
-        default:
-            axis = new THREE.Vector3(0, 1, 0);
-            break;
-        }
-        return axis;    
-    }
-
-    get right() {
-        let axis;
-        switch(this.planeType) {
-        case PLANE.XY:
-            axis = new THREE.Vector3(1, 0, 0);
-            break;
-        case PLANE.YZ:
-            axis = new THREE.Vector3(0, 1, 0);
-            break;    
-        case PLANE.ZX:
-            axis = new THREE.Vector3(0, 0, 1);
-            break;
-        default:
-            axis = new THREE.Vector3(1, 0, 0);
-            break;
-        }
-        return axis;  
-    }
-}
-
-var BasePlane = new WorldPlane(PLANE.XY);
 
 const MESH_MATERIAL = {
-    POINTS: 0,
-    LINEBASIC: 1,
-    BASIC: 2,
-    NORMAL: 3,
-    PHONG: 4,
-}
-
-var GuiParams = function () {
-    this.wireframe = false;
-    this.resetCamera = function () {
-        resetCamera(boundingSphere);
-    };
-    this.objectColor = '#c0c0c0';
-    this.meshMaterial = MESH_MATERIAL.BASIC;
-
-    this.lightColor = '#ffffff';
-    this.lightIntensity = 0.7;
-    this.ambientColor = '#606060';
-
-    // camera
-    this.fov = 0;
-    this.aspect = 0;
-    this.near = 0;
-    this.far = 0;
-
-    // renderer
-    this.viewport = new THREE.Vector4(0, 0, 0, 0);
-    this.resetViewport = function () {
-        resetViewport();
-    }
-
-    this.refresh = function () {
-        function updateControllers(controllers) {
-            for (let i in controllers) {
-                controllers[i].updateDisplay();
-            }
-        }
-
-        function reculsiveGui(_gui) {
-            updateControllers(_gui.__controllers);
-            for (let k of Object.keys(_gui.__folders)) {
-                let f = _gui.__folders[k];
-                reculsiveGui(f);
-            }
-        }
-
-        reculsiveGui(gui);
-    }
+  POINTS: 0,
+  LINEBASIC: 1,
+  BASIC: 2,
+  NORMAL: 3,
+  PHONG: 4,
 };
 
-var guiParams;
-var camera, scene, renderer;
-//var geometry, material, mesh;
+function WorldPlane(planeType) {
+  this.type = planeType;
+  this.normal = new THREE.Vector3(0, 0, 1);
+  this.forward = new THREE.Vector3(0, 1, 0);
+  this.right = new THREE.Vector3(1, 0, 0);
 
-var meshList = new Array();
-var materialList = new Array();
-var groupList = new Array();
+  switch (planeType) {
+    case PLANE.XY:
+      this.normal = new THREE.Vector3(0, 0, 1);
+      break;
+    case PLANE.YZ:
+      this.normal = new THREE.Vector3(1, 0, 0);
+      break;
+    case PLANE.ZX:
+      this.normal = new THREE.Vector3(0, 1, 0);
+      break;
+    default:
+      this.normal = new THREE.Vector3(0, 0, 1);
+      break;
+  }
 
-var directionalLight, ambientLight;
-export var targetSurface;
-var gui, controls;
-var centerHelper, gridHelper;
-var lookatObject, lookatPos, viewPos;
-var boundingSphere;
+  switch (planeType) {
+    case PLANE.XY:
+      this.forward = new THREE.Vector3(0, 1, 0);
+      break;
+    case PLANE.YZ:
+      this.forward = new THREE.Vector3(0, 0, 1);
+      break;
+    case PLANE.ZX:
+      this.forward = new THREE.Vector3(1, 0, 0);
+      break;
+    default:
+      this.forward = new THREE.Vector3(0, 1, 0);
+      break;
+  }
+
+  switch (planeType) {
+    case PLANE.XY:
+      this.right = new THREE.Vector3(1, 0, 0);
+      break;
+    case PLANE.YZ:
+      this.right = new THREE.Vector3(0, 1, 0);
+      break;
+    case PLANE.ZX:
+      this.right = new THREE.Vector3(0, 0, 1);
+      break;
+    default:
+      this.right = new THREE.Vector3(1, 0, 0);
+      break;
+  }
+}
+
+let scene;
+let camera;
+let controls;
+let renderer;
+let targetSurface;
+
+let meshList = [];
+let materialList = [];
+let groupList = [];
+
+let directionalLight;
+let ambientLight;
+
+let guiParams;
+let gui;
+let centerHelper;
+let gridHelper;
+let axisHelper;
+let lookatObject;
+let lookatPos;
+let viewPos;
+
+let boundingSphere;
+let BasePlane = new WorldPlane(PLANE.XY);
 const manager = new THREE.LoadingManager();
 
-export function init() {
-    targetSurface = document.getElementById('gl-canvas');
-    let surfaceWidth = targetSurface.clientWidth;
-    let surfaceHeight = targetSurface.clientHeight;
+export function resetViewport() {
+  const surfaceWidth = targetSurface.clientWidth;
+  const surfaceHeight = targetSurface.clientHeight;
 
-    // Camera
-    camera = new THREE.PerspectiveCamera(60, surfaceWidth / surfaceHeight, 0.5, 2000);
-    lookatObject = new THREE.Object3D();
+  camera.aspect = surfaceWidth / surfaceHeight;
+  camera.updateProjectionMatrix();
 
-    // Basic scene
-    scene = new THREE.Scene();
+  renderer.setSize(surfaceWidth, surfaceHeight, true);
+  renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
+  renderer.getViewport(guiParams.viewport);
 
-    // Light
-    directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-    directionalLight.target = lookatObject;
-    scene.add(directionalLight);
-    ambientLight = new THREE.AmbientLight(0x606060);
-    scene.add(ambientLight);
-
-    // Renderer
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(surfaceWidth, surfaceHeight);
-    renderer.setClearColor(new THREE.Color(0x303030), 1.0);
-    renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
-    renderer.setScissorTest(true);    
-
-    // Window event listener
-    targetSurface.appendChild(renderer.domElement);
-    window.addEventListener('resize', onWindowResize, false);
-
-    // Control
-    //controls = new TrackballControls(camera, renderer.domElement);
-    controls = new OrbitControls(camera, renderer.domElement);
-    //controls.rotateSpeed = 4.0;
-    //controls.zoomSpeed = 1.2;
-    //controls.panSpeed = 0.8;
-    controls.up = BasePlane.normal;
-
-    let meshAndMaeterial = createDefaultBox();
-    let group = new THREE.Group();
-    group.add(meshAndMaeterial[0]);
-    scene.add(group);
-
-    // add to global container
-    groupList.push(group);
-    materialList.push(meshAndMaeterial[1]);
-    meshList.push(meshAndMaeterial[0]);
-
-    // helper
-    gridHelper = new THREE.PolarGridHelper(2, 32, 8, 64, 0x404040, 0x808080);
-    //gridHelper = new THREE.GridHelper(64, 64, 0x404040, 0x808080);
-    let qt = new THREE.Quaternion();
-    qt.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(90));
-    gridHelper.applyQuaternion(qt); 
-    scene.add(gridHelper);
-
-    centerHelper = new CenterHelper(controls);
-    scene.add(centerHelper.group);
-
-    resetBoundingSphere(meshList);
-    resetCamera(boundingSphere);
-    resetHelper(boundingSphere);
-
-    // axes
-    let axes = createAxes(boundingSphere.radius, boundingSphere.center);
-    group.add(axes[0]);
-    group.add(axes[1]);    
-
-    guiParams = new GuiParams();
-    guiParams.lightColor = directionalLight.color.getHex();
-    guiParams.lightIntensity = directionalLight.intensity;
-    guiParams.ambient = ambientLight.color.getHex();
-    guiParams.meshMaterial = MESH_MATERIAL.NORMAL;
-    guiParams.fov = camera.fov;
-    guiParams.aspect = camera.aspect;
-    guiParams.near = camera.near;
-    guiParams.far = camera.far;
-    renderer.getViewport(guiParams.viewport);
-
-    initGUI();
-}
-
-export function changeBasePlane(planeType) {
-    BasePlane = new WorldPlane(planeType);
-    gridHelper.quaternion.set(0,0,0,1);
-
-    let qt = new THREE.Quaternion();
-    qt.setFromUnitVectors(gridHelper.up, BasePlane.normal);
-    gridHelper.applyQuaternion(qt); 
-
-    resetCamera(boundingSphere);
-}
-
-function createDefaultBox() {
-    let geometry = new THREE.BoxGeometry(0.75, 0.75, 0.75);
-    geometry.computeBoundingSphere();
-    geometry.computeBoundingBox();
-    let material = new THREE.MeshNormalMaterial();
-    let mesh = new THREE.Mesh(geometry, material);
-    mesh.scale.set(1, 1.5, 0.5);
-    mesh.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 4);
-    mesh.position.set(0, 0, 0.5);
-
-    return [mesh, material];
-}
-
-function createAxes(axesScale, pos) {
-    let axesHelperModel = new THREE.AxesHelper(axesScale);
-    axesHelperModel.position.set(pos.x, pos.y, pos.z);
-
-    let axesHelperModelBlend = new THREE.AxesHelper(axesScale);
-    axesHelperModelBlend.position.set(pos.x, pos.y, pos.z);
-    axesHelperModelBlend.material.opacity = 0.3;
-    axesHelperModelBlend.material.transparent = true;
-    axesHelperModelBlend.material.depthTest = false;
-
-    return [axesHelperModel, axesHelperModelBlend];
-}
-
-function initGUI() {
-    gui = new dat.GUI({ autoPlace: true });
-
-    gui.add(guiParams, 'resetCamera').name('reset camera');
-
-    gui.add(guiParams, 'wireframe').onChange(function (val) {
-        materialList.forEach(function (mat) {
-            mat.wireframe = val;
-        });
-    });
-
-    let fMat = gui.addFolder('Materials');
-    {
-        fMat.addColor(guiParams, 'objectColor').name('color').onChange(function (val) {
-            materialList.forEach(function (mat) {
-                mat.color = new THREE.Color(val);
-            });
-        });
-        fMat.add(guiParams, 'meshMaterial', MESH_MATERIAL).name('mesh materials').onChange(function (val) {
-            updateMeshMaterial(parseInt(val));
-        });
-    }
-    fMat.open();
-
-    let fProp = gui.addFolder('Properties');
-    {
-        let fLight = fProp.addFolder('Light');
-        fLight.addColor(guiParams, 'lightColor').name('light color').onChange(function(val){
-            directionalLight.color = new THREE.Color(val);
-        });
-        fLight.add(guiParams, 'lightIntensity', 0.0, 2.0).name('light intensity').onChange(function(val){
-            directionalLight.intensity = val;
-        });        
-        fLight.addColor(guiParams, 'ambientColor').name('ambient color').onChange(function(val){
-            ambientLight.color = new THREE.Color(val);
-        });        
-    }
-    {
-        let fCam = fProp.addFolder('Camera');
-        fCam.add(guiParams, 'fov', 25, 80).onChange(function (val) {
-            camera.fov = val;
-            camera.updateProjectionMatrix();
-        });
-        let aspect = fCam.add(guiParams, 'aspect').listen();
-        aspect.domElement.style.pointerEvents = "none"
-        aspect.domElement.style.opacity = 0.5;
-        fCam.add(guiParams, 'near').name('near').onChange(function (val) {
-            if (0 < val && val < camera.far) {
-                camera.near = val;
-                camera.updateProjectionMatrix();
-            }
-            else {
-                guiParams.near = camera.near;
-                guiParams.refresh();
-            }
-        });
-        fCam.add(guiParams, 'far').onChange(function (val) {
-            if (val > camera.near) {
-                camera.far = val;
-                camera.updateProjectionMatrix();
-            }
-            else {
-                guiParams.far = camera.far;
-                guiParams.refresh();
-            }
-        });
-    }
-    {
-        let fRenderer = fProp.addFolder('Renderer');
-        fRenderer.add(guiParams.viewport, 'x').onChange(function () {
-            updateViewport(guiParams.viewport);
-        });
-        fRenderer.add(guiParams.viewport, 'y').onChange(function () {
-            updateViewport(guiParams.viewport);
-        });
-        fRenderer.add(guiParams.viewport, 'width').onChange(function () {
-            updateViewport(guiParams.viewport);
-        });
-        fRenderer.add(guiParams.viewport, 'height').onChange(function () {
-            updateViewport(guiParams.viewport);
-        });
-        fRenderer.add(guiParams, 'resetViewport').name('reset viewport');
-    }
-
-    let customContainer = document.getElementById('gl-gui');
-    customContainer.appendChild(gui.domElement);
+  guiParams.aspect = camera.aspect;
+  guiParams.refresh();
 }
 
 function onWindowResize() {
-    resetViewport();
+  resetViewport();
 }
 
-export function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    centerHelper.update();
+function createDefaultBox() {
+  const geometry = new THREE.BoxGeometry(0.75, 0.75, 0.75);
+  geometry.computeBoundingSphere();
+  geometry.computeBoundingBox();
+  const material = new THREE.MeshNormalMaterial();
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.scale.set(1, 1.5, 0.5);
+  mesh.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 4);
+  mesh.position.set(0, 0, 0.5);
 
-    let lookAtVector = new THREE.Vector3(0, 0, 1);
-    let euler = new THREE.Euler(THREE.Math.degToRad(-15), THREE.Math.degToRad(-30), 0);
-    lookAtVector.applyEuler(euler);
-    lookAtVector.applyQuaternion(camera.quaternion);
-    let lightPosition = lookAtVector.multiplyScalar(boundingSphere.radius * 6);
-    lightPosition.add(lookatPos);
-    directionalLight.position.x = lightPosition.x;
-    directionalLight.position.y = lightPosition.y;
-    directionalLight.position.z = lightPosition.z;
-    directionalLight.target = lookatObject;
-
-    //directionalLightHelper.update();
-
-    renderer.render(scene, camera);
+  return [mesh, material];
 }
 
-export function resetViewport() {
-    let surfaceWidth = targetSurface.clientWidth;
-    let surfaceHeight = targetSurface.clientHeight;
+function createAxes(axesScale, pos) {
+  const axesHelperModel = new THREE.AxesHelper(axesScale);
+  axesHelperModel.position.copy(pos);
 
-    camera.aspect = surfaceWidth / surfaceHeight;
-    camera.updateProjectionMatrix();
+  const axesHelperModelBlend = new THREE.AxesHelper(axesScale);
+  axesHelperModelBlend.position.copy(pos);
+  axesHelperModelBlend.material.opacity = 0.3;
+  axesHelperModelBlend.material.transparent = true;
+  axesHelperModelBlend.material.depthTest = false;
 
-    renderer.setSize(surfaceWidth, surfaceHeight, true);
-    renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
-    renderer.getViewport(guiParams.viewport);
-
-    guiParams.aspect = camera.aspect;
-    guiParams.refresh(); 
-
-    controls.handleResize();
+  return [axesHelperModel, axesHelperModelBlend];
 }
 
-function updateViewport(vp) {
-    renderer.setViewport(vp);
-    renderer.setScissor(vp);
+function resetBoundingSphere(meshes) {
+  const boxList = [];
+  meshes.forEach((mesh) => {
+    mesh.updateWorldMatrix(true, false);
+    const box = new THREE.Box3();
+    box.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
+    boxList.push(box);
+  });
 
-    camera.aspect = vp.width / vp.height;
-    camera.updateProjectionMatrix();
+  const boxAll = new THREE.Box3();
+  boxList.forEach((box) => {
+    boxAll.union(box);
+  });
 
-    guiParams.aspect = camera.aspect;
-    guiParams.refresh();
-}
-
-function updateMeshMaterial(mat) {
-
-    meshList.forEach(function(mesh) {
-        UTIL.removeFromArray(materialList, mesh.material);
-
-        switch (mat) {
-            case MESH_MATERIAL.POINTS:
-                mesh.material = new THREE.PointsMaterial();
-                mesh.material.size = 0.1 * boundingSphere.radius;
-                //material.sizeAttenuation = false;
-                break;
-            case MESH_MATERIAL.LINEBASIC:
-                mesh.material = new THREE.LineBasicMaterial();
-                break;
-            case MESH_MATERIAL.BASIC:
-                mesh.material = new THREE.MeshBasicMaterial();
-                break;
-            case MESH_MATERIAL.NORMAL:
-                mesh.material = new THREE.MeshNormalMaterial();
-                break;
-            case MESH_MATERIAL.PHONG:
-                mesh.material = new THREE.MeshPhongMaterial();
-                break;
-        }
-
-        materialList.push(mesh.material);
-
-        if (THREE.BufferGeometry === mesh.geometry.constructor) {
-            if (mesh.geometry.getAttribute('color')) {
-                mesh.material.vertexColors = true;
-            }
-        }
-
-        mesh.material.color = new THREE.Color(guiParams.objectColor);
-        mesh.material.wireframe = guiParams.wireframe;
-    });
-}
-
-export function clearScene() {
-    groupList.forEach(function (group) {
-        scene.remove(group);
-    });
-
-    groupList = [];
-    materialList = [];
-    meshList = [];
-}
-
-function resetBoundingSphere(meshList) {
-    let boxList = new Array();
-    meshList.forEach(function (mesh) {
-        mesh.updateWorldMatrix(true, false);
-        let box = new THREE.Box3();
-        box.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
-        boxList.push(box);
-    });
-
-    let boxAll = new THREE.Box3();
-    boxList.forEach(function (box) {
-        boxAll.union(box);
-    });
-
-    boundingSphere = new THREE.Sphere();
-    boxAll.getBoundingSphere(boundingSphere);
+  boundingSphere = new THREE.Sphere();
+  boxAll.getBoundingSphere(boundingSphere);
 }
 
 function resetCamera(sphere) {
-    let qtn = new THREE.Quaternion();
-    qtn.setFromAxisAngle(BasePlane.normal, THREE.Math.degToRad(90 + 22.5));
-    let qtr = new THREE.Quaternion();
-    qtr.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(-22.5));
-    let qt = qtn.multiply(qtr);
+  const qtn = new THREE.Quaternion();
+  qtn.setFromAxisAngle(BasePlane.normal, THREE.Math.degToRad(90 + 22.5));
+  const qtr = new THREE.Quaternion();
+  qtr.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(-22.5));
+  const qt = qtn.multiply(qtr);
 
-    // update camera
-    lookatPos = sphere.center.clone();
-    lookatObject.position.set(sphere.center);
-    viewPos = lookatPos.clone();
-    viewPos.add(BasePlane.forward.clone().multiplyScalar(sphere.radius * -3));
+  // update camera
+  lookatPos = sphere.center.clone();
+  lookatObject.position.set(sphere.center);
+  viewPos = lookatPos.clone();
+  viewPos.add(BasePlane.forward.clone().multiplyScalar(sphere.radius * -3));
 
-    let position = viewPos.clone();
-    position.sub(lookatPos);
-    position.applyQuaternion(qt);
-    position.add(lookatPos);
+  const position = viewPos.clone();
+  position.sub(lookatPos);
+  position.applyQuaternion(qt);
+  position.add(lookatPos);
 
-    let up = BasePlane.normal.clone();
-    //up.applyQuaternion(qt);
+  const up = BasePlane.normal.clone();
 
-    camera.position.copy(position);
-    camera.up.copy(up);
-    camera.lookAt(lookatPos.clone());
-    camera.far = Math.max(sphere.radius * 6, 2000);
-    camera.updateProjectionMatrix();
-    controls.target.copy(lookatPos);
-    controls.update();
+  camera.position.copy(position);
+  camera.up.copy(up);
+  camera.lookAt(lookatPos.clone());
+  camera.far = Math.max(sphere.radius * 6, 2000);
+  camera.updateProjectionMatrix();
+  controls.target.copy(lookatPos);
+  controls.update();
 }
 
 function resetHelper(sphere) {
-    let gridScale = sphere.radius * 1.5;
-    gridHelper.scale.set(gridScale, gridScale, gridScale);
+  const gridScale = sphere.radius * 1.5;
+  gridHelper.scale.set(gridScale, gridScale, gridScale);
+
+  axisHelper[0].position.copy(sphere.center);
+  axisHelper[1].position.copy(sphere.center);
 }
 
-export function loadUserMesh(vertices, indices, normals, colors, vertexSize, primitiveType) {
-    clearScene();
+function updateViewport(vp) {
+  renderer.setViewport(vp);
+  renderer.setScissor(vp);
 
-    // Geometry
-    let geometry = new THREE.BufferGeometry();
-    if (vertices) {
-        let floatVertices = new Float32Array(vertices);
-        geometry.setAttribute('position', new THREE.BufferAttribute(floatVertices, vertexSize));
-    }
+  camera.aspect = vp.width / vp.height;
+  camera.updateProjectionMatrix();
 
-    if (indices) {
-        let uintIndices = new Uint16Array(indices);
-        geometry.setIndex(new THREE.BufferAttribute(uintIndices, 1));
-    }
+  guiParams.aspect = camera.aspect;
+  guiParams.refresh();
+}
 
-    if (normals) {
-        let floatNormals = new Float32Array(normals);
-        geometry.setAttribute('normal', new THREE.BufferAttribute(floatNormals, vertexSize));
-    }
-    else {
-        if (PRIMITIVE_TYPE.TRIANGLES == primitiveType) {
-            geometry.computeVertexNormals();
-        }
-    }
+function updateMeshMaterial(mat) {
+  meshList.forEach((_mesh) => {
+    const mesh = _mesh;
+    UTIL.removeFromArray(materialList, mesh.material);
 
-    if (colors) {
-        let floatColors = new Float32Array(colors);
-        geometry.setAttribute('color', new THREE.BufferAttribute(floatColors, vertexSize));
-    }
-
-    geometry.computeBoundingSphere();
-    geometry.computeBoundingBox();
-
-    let mesh = new THREE.Mesh();
-    if (PRIMITIVE_TYPE.POINTS === primitiveType) {
-        mesh = new THREE.Points(geometry);
-    }
-    else if (PRIMITIVE_TYPE.LINES === primitiveType) {
-        mesh = new THREE.LineSegments(geometry);
-    }
-    else {
-        mesh = new THREE.Mesh(geometry);
+    switch (mat) {
+      case MESH_MATERIAL.POINTS:
+        mesh.material = new THREE.PointsMaterial();
+        mesh.material.size = 0.1 * boundingSphere.radius;
+        break;
+      case MESH_MATERIAL.LINEBASIC:
+        mesh.material = new THREE.LineBasicMaterial();
+        break;
+      case MESH_MATERIAL.BASIC:
+        mesh.material = new THREE.MeshBasicMaterial();
+        break;
+      case MESH_MATERIAL.NORMAL:
+        mesh.material = new THREE.MeshNormalMaterial();
+        break;
+      case MESH_MATERIAL.PHONG:
+        mesh.material = new THREE.MeshPhongMaterial();
+        break;
+      default:
+        mesh.material = new THREE.MeshBasicMaterial();
+        break;
     }
 
-    let materialType = MESH_MATERIAL.NORMAL;
-    // Meterial
-    if (PRIMITIVE_TYPE.POINTS === primitiveType) {
-        materialType = MESH_MATERIAL.POINTS;
-    }
-    else if (PRIMITIVE_TYPE.LINES === primitiveType) {
-        materialType = MESH_MATERIAL.LINEBASIC;
-    }
-    else {
-        if (normals) {
-            if (colors) {
-                materialType = MESH_MATERIAL.PHONG;
-            }
-            else {
-                materialType = MESH_MATERIAL.NORMAL;
-            }
-        }
-        else {
-            materialType = MESH_MATERIAL.BASIC;
-        }
-    }
-
-    let group = new THREE.Group();
-    group.add(mesh);
-    scene.add(group);
-
-    // add to global container
-    groupList.push(group);
     materialList.push(mesh.material);
-    meshList.push(mesh);
 
-    updateMeshMaterial(materialType);
+    if (THREE.BufferGeometry === mesh.geometry.constructor) {
+      if (mesh.geometry.getAttribute("color")) {
+        mesh.material.vertexColors = true;
+      }
+    }
 
-    resetBoundingSphere(meshList);
+    mesh.material.color = new THREE.Color(guiParams.objectColor);
+    mesh.material.wireframe = guiParams.wireframe;
+  });
+}
+
+function GuiParams() {
+  this.wireframe = false;
+  this.resetCamera = () => {
     resetCamera(boundingSphere);
-    resetHelper(boundingSphere);
+  };
+  this.objectColor = "#c0c0c0";
+  this.meshMaterial = MESH_MATERIAL.BASIC;
 
-    // axes
-    let axes = createAxes(geometry.boundingSphere.radius, geometry.boundingSphere.center);
-    group.add(axes[0]);
-    group.add(axes[1]);
+  this.lightColor = "#ffffff";
+  this.lightIntensity = 0.7;
+  this.ambientColor = "#606060";
 
-    // udpate gui
-    guiParams.meshMaterial = materialType;
-    guiParams.refresh();
+  // camera
+  this.fov = 0;
+  this.aspect = 0;
+  this.near = 0;
+  this.far = 0;
+
+  // renderer
+  this.viewport = new THREE.Vector4(0, 0, 0, 0);
+  this.resetViewport = function _resetViewport() {
+    resetViewport();
+  };
+
+  this.refresh = function _refresh() {
+    function updateControllers(controllers) {
+      controllers.forEach((controller) => {
+        controller.updateDisplay();
+      });
+    }
+
+    function reculsiveGui(rgui) {
+      updateControllers(rgui.__controllers);
+
+      Object.keys(rgui.__folders).forEach((key) => {
+        const folder = rgui.__folders[key];
+        reculsiveGui(folder);
+      });
+    }
+
+    reculsiveGui(gui);
+  };
+}
+
+function initGUI() {
+  gui = new dat.GUI({ autoPlace: true });
+
+  gui.add(guiParams, "resetCamera").name("reset camera");
+
+  gui.add(guiParams, "wireframe").onChange((val) => {
+    for (let i = 0; i < materialList.length; i += 1) {
+      const mat = materialList[i];
+      mat.wireframe = val;
+    }
+  });
+
+  const fMat = gui.addFolder("Materials");
+  if (undefined !== fMat) {
+    fMat
+      .addColor(guiParams, "objectColor")
+      .name("color")
+      .onChange((val) => {
+        for (let i = 0; i < materialList.length; i += 1) {
+          const mat = materialList[i];
+          mat.color = new THREE.Color(val);
+        }
+      });
+    fMat
+      .add(guiParams, "meshMaterial", MESH_MATERIAL)
+      .name("mesh materials")
+      .onChange((val) => {
+        updateMeshMaterial(parseInt(val, 10));
+      });
+  }
+  fMat.open();
+
+  const fProp = gui.addFolder("Properties");
+  {
+    const fLight = fProp.addFolder("Light");
+    fLight
+      .addColor(guiParams, "lightColor")
+      .name("light color")
+      .onChange((val) => {
+        directionalLight.color = new THREE.Color(val);
+      });
+    fLight
+      .add(guiParams, "lightIntensity", 0.0, 2.0)
+      .name("light intensity")
+      .onChange((val) => {
+        directionalLight.intensity = val;
+      });
+    fLight
+      .addColor(guiParams, "ambientColor")
+      .name("ambient color")
+      .onChange((val) => {
+        ambientLight.color = new THREE.Color(val);
+      });
+  }
+  {
+    const fCam = fProp.addFolder("Camera");
+    fCam.add(guiParams, "fov", 25, 80).onChange((val) => {
+      camera.fov = val;
+      camera.updateProjectionMatrix();
+    });
+    const aspect = fCam.add(guiParams, "aspect").listen();
+    aspect.domElement.style.pointerEvents = "none";
+    aspect.domElement.style.opacity = 0.5;
+    fCam
+      .add(guiParams, "near")
+      .name("near")
+      .onChange((val) => {
+        if (val > 0 && val < camera.far) {
+          camera.near = val;
+          camera.updateProjectionMatrix();
+        } else {
+          guiParams.near = camera.near;
+          guiParams.refresh();
+        }
+      });
+    fCam.add(guiParams, "far").onChange((val) => {
+      if (val > camera.near) {
+        camera.far = val;
+        camera.updateProjectionMatrix();
+      } else {
+        guiParams.far = camera.far;
+        guiParams.refresh();
+      }
+    });
+  }
+  {
+    const fRenderer = fProp.addFolder("Renderer");
+    fRenderer.add(guiParams.viewport, "x").onChange(() => {
+      updateViewport(guiParams.viewport);
+    });
+    fRenderer.add(guiParams.viewport, "y").onChange(() => {
+      updateViewport(guiParams.viewport);
+    });
+    fRenderer.add(guiParams.viewport, "width").onChange(() => {
+      updateViewport(guiParams.viewport);
+    });
+    fRenderer.add(guiParams.viewport, "height").onChange(() => {
+      updateViewport(guiParams.viewport);
+    });
+    fRenderer.add(guiParams, "resetViewport").name("reset viewport");
+  }
+
+  const customContainer = document.getElementById("gl-gui");
+  customContainer.appendChild(gui.domElement);
+}
+
+export function init() {
+  targetSurface = document.getElementById("gl-canvas");
+  const surfaceWidth = targetSurface.clientWidth;
+  const surfaceHeight = targetSurface.clientHeight;
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(
+    60,
+    surfaceWidth / surfaceHeight,
+    0.5,
+    2000
+  );
+  lookatObject = new THREE.Object3D();
+
+  // Basic scene
+  scene = new THREE.Scene();
+
+  // Light
+  directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+  directionalLight.target = lookatObject;
+  scene.add(directionalLight);
+  ambientLight = new THREE.AmbientLight(0x606060);
+  scene.add(ambientLight);
+
+  // Renderer
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(surfaceWidth, surfaceHeight);
+  renderer.setClearColor(new THREE.Color(0x303030), 1.0);
+  renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
+  renderer.setScissorTest(true);
+
+  // Window event listener
+  targetSurface.appendChild(renderer.domElement);
+  window.addEventListener("resize", onWindowResize, false);
+
+  // Control
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.1;
+
+  // Group
+  const group = new THREE.Group();
+
+  // Box
+  const meshAndMaeterial = createDefaultBox();
+  group.add(meshAndMaeterial[0]);
+
+  // Helper
+  // grid
+  gridHelper = new THREE.PolarGridHelper(2, 32, 8, 64, 0x404040, 0x808080);
+  const qt = new THREE.Quaternion();
+  qt.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(90));
+  gridHelper.applyQuaternion(qt);
+
+  // center
+  centerHelper = new CenterHelper(controls);
+
+  // axes
+  axisHelper = createAxes(1.0, lookatObject.position);
+
+  groupList.push(group);
+  meshList.push(meshAndMaeterial[0]);
+  materialList.push(meshAndMaeterial[1]);
+
+  scene.add(gridHelper);
+  scene.add(centerHelper.group);
+  scene.add(axisHelper[0]);
+  scene.add(axisHelper[1]);
+  scene.add(group);
+
+  // Reset
+  resetBoundingSphere(meshList);
+  resetCamera(boundingSphere);
+  resetHelper(boundingSphere);
+
+  // GUI
+  guiParams = new GuiParams();
+  guiParams.lightColor = directionalLight.color.getHex();
+  guiParams.lightIntensity = directionalLight.intensity;
+  guiParams.ambient = ambientLight.color.getHex();
+  guiParams.meshMaterial = MESH_MATERIAL.NORMAL;
+  guiParams.fov = camera.fov;
+  guiParams.aspect = camera.aspect;
+  guiParams.near = camera.near;
+  guiParams.far = camera.far;
+  renderer.getViewport(guiParams.viewport);
+
+  initGUI();
+}
+
+export function changeBasePlane(planeType) {
+  BasePlane = new WorldPlane(planeType);
+  gridHelper.quaternion.set(0, 0, 0, 1);
+
+  const qt = new THREE.Quaternion();
+  qt.setFromUnitVectors(gridHelper.up, BasePlane.normal);
+  gridHelper.applyQuaternion(qt);
+
+  resetCamera(boundingSphere);
+}
+
+export function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  centerHelper.update();
+
+  const lookAtVector = new THREE.Vector3(0, 0, 1);
+  const euler = new THREE.Euler(
+    THREE.Math.degToRad(-15),
+    THREE.Math.degToRad(-30),
+    0
+  );
+  lookAtVector.applyEuler(euler);
+  lookAtVector.applyQuaternion(camera.quaternion);
+  const lightPosition = lookAtVector.multiplyScalar(boundingSphere.radius * 6);
+  lightPosition.add(lookatPos);
+  directionalLight.position.x = lightPosition.x;
+  directionalLight.position.y = lightPosition.y;
+  directionalLight.position.z = lightPosition.z;
+  directionalLight.target = lookatObject;
+
+  renderer.render(scene, camera);
+}
+
+export function clearScene() {
+  groupList.forEach((group) => {
+    scene.remove(group);
+  });
+
+  groupList = [];
+  materialList = [];
+  meshList = [];
+}
+
+export function loadUserMesh(
+  vertices,
+  indices,
+  normals,
+  colors,
+  vertexSize,
+  primitiveType
+) {
+  clearScene();
+
+  // Geometry
+  const geometry = new THREE.BufferGeometry();
+  if (vertices) {
+    const floatVertices = new Float32Array(vertices);
+    geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(floatVertices, vertexSize)
+    );
+  }
+
+  if (indices) {
+    const uintIndices = new Uint16Array(indices);
+    geometry.setIndex(new THREE.BufferAttribute(uintIndices, 1));
+  }
+
+  if (normals) {
+    const floatNormals = new Float32Array(normals);
+    geometry.setAttribute(
+      "normal",
+      new THREE.BufferAttribute(floatNormals, vertexSize)
+    );
+  } else {
+    if (PRIMITIVE_TYPE.TRIANGLES === primitiveType) {
+      geometry.computeVertexNormals();
+    }
+  }
+
+  if (colors) {
+    const floatColors = new Float32Array(colors);
+    geometry.setAttribute(
+      "color",
+      new THREE.BufferAttribute(floatColors, vertexSize)
+    );
+  }
+
+  geometry.computeBoundingSphere();
+  geometry.computeBoundingBox();
+
+  let mesh = new THREE.Mesh();
+  if (PRIMITIVE_TYPE.POINTS === primitiveType) {
+    mesh = new THREE.Points(geometry);
+  } else if (PRIMITIVE_TYPE.LINES === primitiveType) {
+    mesh = new THREE.LineSegments(geometry);
+  } else {
+    mesh = new THREE.Mesh(geometry);
+  }
+
+  let materialType = MESH_MATERIAL.NORMAL;
+  // Meterial
+  if (PRIMITIVE_TYPE.POINTS === primitiveType) {
+    materialType = MESH_MATERIAL.POINTS;
+  } else if (PRIMITIVE_TYPE.LINES === primitiveType) {
+    materialType = MESH_MATERIAL.LINEBASIC;
+  } else {
+    if (normals) {
+      if (colors) {
+        materialType = MESH_MATERIAL.PHONG;
+      } else {
+        materialType = MESH_MATERIAL.NORMAL;
+      }
+    } else {
+      materialType = MESH_MATERIAL.BASIC;
+    }
+  }
+
+  const group = new THREE.Group();
+  group.add(mesh);
+
+  groupList.push(group);
+  meshList.push(mesh);
+  materialList.push(mesh.material);
+
+  scene.add(group);
+
+  updateMeshMaterial(materialType);
+
+  resetBoundingSphere(meshList);
+  resetCamera(boundingSphere);
+  resetHelper(boundingSphere);
+
+  // udpate gui
+  guiParams.meshMaterial = materialType;
+  guiParams.refresh();
 }
 
 export function loadCollada(files) {
-    clearScene();
+  clearScene();
 
-    let extraFiles = {};
-    let daeFile = "";
-    let fbxFile = "";
+  const extraFiles = {};
+  let daeFile = "";
+  let fbxFile = "";
 
-    for (var i = 0; i < files.length; i++) {
-        let file = files[i];
-        extraFiles[file.name] = file;   
-        //console.log("load file: " + file.name);
-        if (files[i].name.match(/\w*.dae\b/i)) {
-            daeFile = file.name;
-        }
-        if (files[i].name.match(/\w*.fbx\b/i)) {
-            fbxFile = file.name;
-        }        
+  for (let i = 0; i < files.length; i += 1) {
+    const file = files[i];
+    extraFiles[file.name] = file;
+
+    if (files[i].name.match(/\w*.dae\b/i)) {
+      daeFile = file.name;
+    }
+    if (files[i].name.match(/\w*.fbx\b/i)) {
+      fbxFile = file.name;
+    }
+  }
+
+  manager.setURLModifier((url) => {
+    let fileurl = url.replace("data:application/", "");
+    // eslint-disable-next-line no-useless-escape
+    fileurl = fileurl.split(/[\/\\]/);
+    fileurl = fileurl[fileurl.length - 1];
+    const decurl = decodeURI(fileurl);
+
+    if (extraFiles[decurl] !== undefined) {
+      const blobURL = URL.createObjectURL(extraFiles[decurl]);
+      return blobURL;
+    }
+    return url;
+  });
+
+  // eslint-disable-next-line no-console
+  console.log(daeFile);
+
+  let modelLoader;
+  let modelFile;
+  if (daeFile.length > 0) {
+    modelLoader = new ColladaLoader(manager);
+    modelFile = daeFile;
+  } else if (fbxFile.length > 0) {
+    modelLoader = new FBXLoader(manager);
+    modelFile = fbxFile;
+  }
+
+  if (modelFile === undefined || modelLoader === undefined) {
+    return;
+  }
+
+  modelLoader.load(modelFile, (model) => {
+    let modelGroup;
+    if (fbxFile.length > 0) {
+      modelGroup = model;
+    } else {
+      modelGroup = model.scene;
     }
 
-    manager.setURLModifier(function (url) {
-        
-        let fileurl = url.replace('data:application/', '');
-        fileurl = fileurl.split(/[\/\\]/);
-        fileurl = fileurl[fileurl.length - 1];
-        let decurl = decodeURI(fileurl);
-
-        //console.log("modifier: " + fileurl + ", " + decurl);
-
-        if (extraFiles[decurl] !== undefined) {
-            const blobURL = URL.createObjectURL(extraFiles[decurl]);
-            return blobURL;
+    const modelMeshList = [];
+    modelGroup.traverse((_child) => {
+      const child = _child;
+      if (child.isMesh) {
+        if (child.material.length > 1) {
+          for (let i = 0; i < child.material.length; i += 1) {
+            child.material[i].side = THREE.DoubleSide;
+            materialList.push(child.material[i]);
+          }
+        } else {
+          child.material.side = THREE.DoubleSide;
+          materialList.push(child.material);
         }
-        return url;
+        child.geometry.computeBoundingSphere();
+        child.geometry.computeBoundingBox();
+        modelMeshList.push(child);
+      }
     });
 
-    console.log(daeFile);
+    scene.add(modelGroup);
+    const group = new THREE.Group();
 
-    let modelLoader;
-    let modelFile;
-    if (daeFile.length > 0) {
-        modelLoader = new ColladaLoader(manager);
-        modelFile = daeFile;
+    groupList.push(modelGroup);
+    groupList.push(group);
 
-    } else if(fbxFile.length > 0) {
-        modelLoader = new FBXLoader(manager);
-        modelFile = fbxFile;
-    }
+    scene.add(group);
 
-    if (modelFile === undefined || modelLoader === undefined) {
-        return;
-    }
-
-    modelLoader.load(modelFile, function (model) {
-
-        let modelGroup;
-        if (fbxFile.length > 0) {
-            modelGroup = model;
-        }
-        else {
-            modelGroup = model.scene;
-        }
-        
-        let modelMeshList = new Array();
-        modelGroup.traverse(function (child) {
-            if (child.isMesh) {
-                if (child.material.length > 1) {
-                    for (var i = 0; i < child.material.length; i++) {
-                        child.material[i].side = THREE.DoubleSide;
-                        materialList.push(child.material[i]);
-                    }
-                }
-                else {
-                    child.material.side = THREE.DoubleSide;
-                    materialList.push(child.material);
-                }
-                child.geometry.computeBoundingSphere();
-                child.geometry.computeBoundingBox();
-                modelMeshList.push(child);
-            }
-        });
-
-        scene.add(modelGroup);
-        let group = new THREE.Group();
-        scene.add(group);
-
-        groupList.push(modelGroup);        
-        groupList.push(group);
-
-        resetBoundingSphere(modelMeshList);
-        resetCamera(boundingSphere);
-        resetHelper(boundingSphere);
-
-        // axes
-        let axes = createAxes(boundingSphere.radius, boundingSphere.center);
-        group.add(axes[0]);
-        group.add(axes[1]);
-    });    
+    resetBoundingSphere(modelMeshList);
+    resetCamera(boundingSphere);
+    resetHelper(boundingSphere);
+  });
 }
 
-var observer = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutation) {
-        if ('gl-canvas' === mutation.target.id) {
-            resetViewport();
-        }
-    });
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.target.id === "gl-canvas") {
+      resetViewport();
+    }
+  });
 });
-var target = document.getElementById('gl-canvas');
+const target = document.getElementById("gl-canvas");
 observer.observe(target, {
-    attributes: true
+  attributes: true,
 });

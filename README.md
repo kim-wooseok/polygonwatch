@@ -4,7 +4,7 @@
 
 Enter the 3D object information from the IDE Watch with copy & paste.
  
-1. Select row of your vertices from watch window. supported data type is array, struct(has 3 vriables), tuple(has 3 elements).
+1. Select row of your vertices from watch window. supported data type is array, struct(has 3 va`riables), tuple(has 3 elements).
 
     <img src="https://github.com/kim-wooseok/polygonwatch/blob/master/desc/vs_watch_array.png?raw=true" alt="from array" title="from array" width="320px">
 
