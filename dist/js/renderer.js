@@ -1,4 +1,5 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.module.js";
+import { BufferGeometryUtils } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/utils/BufferGeometryUtils.js"
 import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/ColladaLoader.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js";
 import * as dat from "https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js";
@@ -14,7 +15,11 @@ export const PRIMITIVE_MODE = {
 export const PRIMITIVE_TYPE = {
   POINTS: 1,
   LINES: 2,
-  TRIANGLES: 3,
+  LINESTRIP: 3,
+  TRIANGLES: 4,
+  TRIANGLESTRIP: 5,
+  TRIANGLEFAN: 6,
+  ERROR: 7,
 };
 
 export const PLANE = {
@@ -201,7 +206,8 @@ function resetCamera(sphere) {
   controls.update();
 }
 
-function resetHelper(sphere) {
+function resetHelper(sphere)
+{
   const gridScale = sphere.radius * 1.5;
   gridHelper.scale.set(gridScale, gridScale, gridScale);
 
@@ -556,7 +562,7 @@ export function loadUserMesh(
   clearScene();
 
   // Geometry
-  const geometry = new THREE.BufferGeometry();
+  let geometry = new THREE.BufferGeometry();
   if (vertices) {
     const floatVertices = new Float32Array(vertices);
     geometry.setAttribute(
@@ -598,15 +604,25 @@ export function loadUserMesh(
     mesh = new THREE.Points(geometry);
   } else if (PRIMITIVE_TYPE.LINES === primitiveType) {
     mesh = new THREE.LineSegments(geometry);
-  } else {
+  } else if (PRIMITIVE_TYPE.LINESTRIP === primitiveType) {
+    mesh = new THREE.Line(geometry);
+  } else if (PRIMITIVE_TYPE.TRIANGLES === primitiveType) {
     mesh = new THREE.Mesh(geometry);
+  } else if (PRIMITIVE_TYPE.TRIANGLESTRIP === primitiveType) {
+    geometry = BufferGeometryUtils.toTrianglesDrawMode(geometry, THREE.TriangleStripDrawMode);
+    mesh = new THREE.Mesh(geometry);
+  } else if (PRIMITIVE_TYPE.TRIANGLEFAN === primitiveType) {
+    geometry = BufferGeometryUtils.toTrianglesDrawMode(geometry, THREE.TriangleFanDrawMode);
+    mesh = new THREE.Mesh(geometry);
+  } else {
+    return;
   }
 
   let materialType = MESH_MATERIAL.NORMAL;
   // Meterial
   if (PRIMITIVE_TYPE.POINTS === primitiveType) {
     materialType = MESH_MATERIAL.POINTS;
-  } else if (PRIMITIVE_TYPE.LINES === primitiveType) {
+  } else if (PRIMITIVE_TYPE.LINES === primitiveType || PRIMITIVE_TYPE.LINESTRIP === primitiveType) {
     materialType = MESH_MATERIAL.LINEBASIC;
   } else {
     if (normals) {

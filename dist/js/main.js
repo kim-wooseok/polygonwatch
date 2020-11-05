@@ -11,7 +11,10 @@ function PrimitiveElements() {
 
   this.typePoints = $("#primitivePoints").get(0);
   this.typeLines = $("#primitiveLines").get(0);
+  this.typeLineStrip = $("#primitiveLineStrip").get(0);
   this.typeTriangles = $("#primitiveTriangles").get(0);
+  this.typeTriangleStrip = $("#primitiveTriangleStrip").get(0);
+  this.typeTriangleFan = $("#primitiveTriangleFan").get(0);
 
   this.planeXY = $("#planeXY").get(0);
   this.planeYZ = $("#planeYZ").get(0);
@@ -113,8 +116,14 @@ $("#runButton").click(() => {
     primitiveType = RENDERER.PRIMITIVE_TYPE.POINTS;
   } else if (primitiveElements.typeLines.checked === true) {
     primitiveType = RENDERER.PRIMITIVE_TYPE.LINES;
-  } else {
+  } else if (primitiveElements.typeLineStrip.checked === true) {
+    primitiveType = RENDERER.PRIMITIVE_TYPE.LINESTRIP;
+  } else if(primitiveElements.typeTriangles.checked === true) {
     primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
+  } else if(primitiveElements.typeTriangleStrip.checked === true) {
+    primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLESTRIP;
+  }else if(primitiveElements.typeTriangleFan.checked === true) {
+    primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLEFAN;
   }
 
   RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primitiveType);
@@ -148,7 +157,7 @@ $(document).ready(() => {
   });
 });
 
-$("#regexSelect").on("change", () => {
+$("#regexSelect").on("change", function () {
   const selected = $(this).val();
 
   if (selected.startsWith("Visual")) {
