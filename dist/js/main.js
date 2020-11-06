@@ -170,19 +170,19 @@ $("#regexSelect").on("change", function () {
 });
 
 $("#primitive3D").change(() => {
-  primitiveElements.normals.disabled = false;
-  primitiveElements.typeTriangles.disabled = false;
+  //primitiveElements.normals.disabled = false;
+  //primitiveElements.typeTriangles.disabled = false;
 });
 
 $("#primitive2D").change(() => {
-  if (primitiveElements.normals.checked === true) {
-    primitiveElements.normals.checked = false;
-  }
-  if (primitiveElements.typeTriangles.checked === true) {
-    primitiveElements.typeLines.checked = true;
-  }
-  primitiveElements.normals.disabled = true;
-  primitiveElements.typeTriangles.disabled = true;
+  // if (primitiveElements.normals.checked === true) {
+  //   primitiveElements.normals.checked = false;
+  // }
+  // if (primitiveElements.typeTriangles.checked === true) {
+  //   primitiveElements.typeLines.checked = true;
+  // }
+  // primitiveElements.normals.disabled = true;
+  // primitiveElements.typeTriangles.disabled = true;
 });
 
 $("#planeXY").change(() => {

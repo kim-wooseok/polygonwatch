@@ -28,6 +28,12 @@ export const PLANE = {
   ZX: "ZX",
 };
 
+const MESH_SIDE = {
+  FRONT: THREE.FrontSide,
+  BACK: THREE.BackSide,
+  DOUBLE: THREE.DoubleSide,
+}
+
 const MESH_MATERIAL = {
   POINTS: 0,
   LINEBASIC: 1,
@@ -234,7 +240,13 @@ function updateMeshMaterial(mat) {
     switch (mat) {
       case MESH_MATERIAL.POINTS:
         mesh.material = new THREE.PointsMaterial();
-        mesh.material.size = 0.1 * boundingSphere.radius;
+        mesh.material.size = 15; // 0.1 * boundingSphere.radius;
+        mesh.material.sizeAttenuation = false;
+        const sprite = new THREE.TextureLoader().load("js/three.js/examples/textures/sprites/disc.png");
+        mesh.material.map = sprite;
+        mesh.material.alphaTest = 0.5;
+        mesh.material.transparent = true;
+        mesh.material.needsUpdate = true;
         break;
       case MESH_MATERIAL.LINEBASIC:
         mesh.material = new THREE.LineBasicMaterial();
@@ -267,10 +279,13 @@ function updateMeshMaterial(mat) {
 }
 
 function GuiParams() {
-  this.wireframe = false;
   this.resetCamera = () => {
     resetCamera(boundingSphere);
   };
+
+  this.wireframe = false;
+  this.side = MESH_SIDE.FRONT;
+
   this.objectColor = "#c0c0c0";
   this.meshMaterial = MESH_MATERIAL.BASIC;
 
@@ -321,6 +336,17 @@ function initGUI() {
       mat.wireframe = val;
     }
   });
+
+  gui
+    .add(guiParams, "side", MESH_SIDE)
+    .name("side")
+    .onChange((val) => {
+      const newSide = parseInt(val, MESH_SIDE.FRONT);
+      for (let i = 0; i < materialList.length; i += 1) {
+        const mat = materialList[i];
+        mat.side = newSide;
+      }
+    });
 
   const fMat = gui.addFolder("Materials");
   if (undefined !== fMat) {
