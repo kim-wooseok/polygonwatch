@@ -20,7 +20,12 @@
         "import/no-unresolved": "off",
         "import/extensions": "off",
         "no-lonely-if": "off",
-        "no-underscore-dangle": "off",
-        "endOfLine": "auto"
-    }
+        "no-underscore-dangle": "off"
+    },
+    "prettier/prettier": [
+        "error",
+        {
+            "endOfLine": "auto"
+        }
+    ]
 }

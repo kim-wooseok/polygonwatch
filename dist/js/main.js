@@ -126,6 +126,15 @@ $("#runButton").click(() => {
     primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLEFAN;
   }
 
+  store.set('user', {
+    dim : primitiveElements.mode2D.checked === true ? 2 : 3,
+    hasIndices : primitiveElements.indices.checked === true,
+    hasNormals : primitiveElements.normals.checked === true,
+    hasColors : primitiveElements.colors.checked === true,
+    primitiveType: primitiveType,
+    dataType: $("#regexSelect").val(),
+  });
+
   RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primitiveType);
 });
 
@@ -157,8 +166,8 @@ $(document).ready(() => {
   });
 });
 
-$("#regexSelect").on("change", function () {
-  const selected = $(this).val();
+function onRegexSelectChanged() {
+  const selected = $("#regexSelect").val();
 
   if (selected.startsWith("Visual")) {
     const el = document.getElementById("regexFormat");
@@ -167,7 +176,9 @@ $("#regexSelect").on("change", function () {
     const el = document.getElementById("regexFormat");
     el.value = REGEX_CSV;
   }
-});
+}
+
+$("#regexSelect").on("change", onRegexSelectChanged);
 
 $("#primitive3D").change(() => {
   //primitiveElements.normals.disabled = false;
@@ -203,6 +214,56 @@ $("#gl-gui-fullscreen").on("click", () => {
   }
 });
 
+function loadCache()
+{
+  const userCache = store.get('user');
+  if (userCache != undefined)
+  {
+    if (2 === userCache.dim) {
+      primitiveElements.mode2D.checked = true;
+    } else {
+      primitiveElements.mode3D.checked = true;
+    }
+
+    if (true === userCache.hasIndices) {
+      primitiveElements.indices.checked = true;
+    }
+    if (true === userCache.hasNormals) {
+      primitiveElements.normals.checked = true;
+    }
+    if (true === userCache.hasColors) {
+      primitiveElements.colors.checked = true;
+    }
+
+    switch(userCache.primitiveType) {
+      case RENDERER.PRIMITIVE_TYPE.POINTS:
+        primitiveElements.typePoints.checked = true;
+        break;
+      case RENDERER.PRIMITIVE_TYPE.LINES:
+        primitiveElements.typeLines.checked = true;
+        break;
+      case RENDERER.PRIMITIVE_TYPE.LINESTRIP:
+        primitiveElements.typeLineStrip.checked = true;
+        break;
+      case RENDERER.PRIMITIVE_TYPE.TRIANGLES:
+        primitiveElements.typeTriangles.checked = true;
+        break;
+      case RENDERER.PRIMITIVE_TYPE.TRIANGLESTRIP:
+        primitiveElements.typeTriangleStrip.checked = true;
+        break;
+      case RENDERER.PRIMITIVE_TYPE.TRIANGLEFAN:
+        primitiveElements.typeTriangleFan.checked = true;
+        break;
+      default:
+        primitiveElements.typeTriangles.checked = true;
+        break;
+    }
+
+    $("#regexSelect").val(userCache.dataType);
+    onRegexSelectChanged();
+  }  
+}
+
 export default function bodyInit(screenfullVar) {
   primitiveElements.mode3D.checked = true;
   primitiveElements.typeTriangles.checked = true;
@@ -222,6 +283,8 @@ export default function bodyInit(screenfullVar) {
     }
     RENDERER.resetViewport();
   });
+
+  loadCache();
 }
 
 export { bodyInit };
