@@ -2,6 +2,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.m
 import { BufferGeometryUtils } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/utils/BufferGeometryUtils.js"
 import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/ColladaLoader.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js";
+import Stats from "https://cdn.jsdelivr.net/npm/three@0.122.0/examples/jsm/libs/stats.module.js";
 import * as dat from "https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js";
 import { OrbitControls } from "./three.js/examples/jsm/controls/OrbitControls.js";
 import { CenterHelper } from "./helper.js";
@@ -119,6 +120,8 @@ let viewPos;
 let boundingSphere;
 let BasePlane = new WorldPlane(PLANE.XY);
 const manager = new THREE.LoadingManager();
+
+const stats = new Stats();
 
 export function resetViewport() {
   const surfaceWidth = targetSurface.clientWidth;
@@ -440,6 +443,11 @@ function initGUI() {
 
   const customContainer = document.getElementById("gl-gui");
   customContainer.appendChild(gui.domElement);
+
+  stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+  stats.dom.style.position = "absolute";
+  const glContainer = document.getElementById("gl-container");
+  glContainer.appendChild(stats.dom);
 }
 
 export function init() {
@@ -544,8 +552,10 @@ export function changeBasePlane(planeType) {
   resetCamera(boundingSphere);
 }
 
-export function animate() {
+export function animate(timestamp) {
   requestAnimationFrame(animate);
+
+  stats.begin();
   controls.update();
   centerHelper.update();
 
@@ -565,6 +575,7 @@ export function animate() {
   directionalLight.target = lookatObject;
 
   renderer.render(scene, camera);
+  stats.end();
 }
 
 export function clearScene() {
