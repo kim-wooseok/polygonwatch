@@ -1,5 +1,5 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.module.js";
-import { BufferGeometryUtils } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/utils/BufferGeometryUtils.js"
+import { BufferGeometryUtils } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/utils/BufferGeometryUtils.js";
 import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/ColladaLoader.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js";
 import Stats from "https://cdn.jsdelivr.net/npm/three@0.122.0/examples/jsm/libs/stats.module.js";
@@ -33,7 +33,7 @@ const MESH_SIDE = {
   FRONT: THREE.FrontSide,
   BACK: THREE.BackSide,
   DOUBLE: THREE.DoubleSide,
-}
+};
 
 const MESH_MATERIAL = {
   POINTS: 0,
@@ -215,8 +215,7 @@ function resetCamera(sphere) {
   controls.update();
 }
 
-function resetHelper(sphere)
-{
+function resetHelper(sphere) {
   const gridScale = sphere.radius * 1.5;
   gridHelper.scale.set(gridScale, gridScale, gridScale);
 
@@ -241,16 +240,20 @@ function updateMeshMaterial(mat) {
     UTIL.removeFromArray(materialList, mesh.material);
 
     switch (mat) {
-      case MESH_MATERIAL.POINTS:
+      case MESH_MATERIAL.POINTS: {
+        const sprite = new THREE.TextureLoader().load(
+          "js/three.js/examples/textures/sprites/disc.png"
+        );
+
         mesh.material = new THREE.PointsMaterial();
         mesh.material.size = 15; // 0.1 * boundingSphere.radius;
         mesh.material.sizeAttenuation = false;
-        const sprite = new THREE.TextureLoader().load("js/three.js/examples/textures/sprites/disc.png");
         mesh.material.map = sprite;
         mesh.material.alphaTest = 0.5;
         mesh.material.transparent = true;
         mesh.material.needsUpdate = true;
         break;
+      }
       case MESH_MATERIAL.LINEBASIC:
         mesh.material = new THREE.LineBasicMaterial();
         break;
@@ -278,6 +281,7 @@ function updateMeshMaterial(mat) {
 
     mesh.material.color = new THREE.Color(guiParams.objectColor);
     mesh.material.wireframe = guiParams.wireframe;
+    mesh.material.side = guiParams.side;
   });
 }
 
@@ -444,7 +448,7 @@ function initGUI() {
   const customContainer = document.getElementById("gl-gui");
   customContainer.appendChild(gui.domElement);
 
-  stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+  stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
   stats.dom.style.position = "absolute";
   const glContainer = document.getElementById("gl-container");
   glContainer.appendChild(stats.dom);
@@ -552,7 +556,7 @@ export function changeBasePlane(planeType) {
   resetCamera(boundingSphere);
 }
 
-export function animate(timestamp) {
+export function animate() {
   requestAnimationFrame(animate);
 
   stats.begin();
@@ -646,10 +650,16 @@ export function loadUserMesh(
   } else if (PRIMITIVE_TYPE.TRIANGLES === primitiveType) {
     mesh = new THREE.Mesh(geometry);
   } else if (PRIMITIVE_TYPE.TRIANGLESTRIP === primitiveType) {
-    geometry = BufferGeometryUtils.toTrianglesDrawMode(geometry, THREE.TriangleStripDrawMode);
+    geometry = BufferGeometryUtils.toTrianglesDrawMode(
+      geometry,
+      THREE.TriangleStripDrawMode
+    );
     mesh = new THREE.Mesh(geometry);
   } else if (PRIMITIVE_TYPE.TRIANGLEFAN === primitiveType) {
-    geometry = BufferGeometryUtils.toTrianglesDrawMode(geometry, THREE.TriangleFanDrawMode);
+    geometry = BufferGeometryUtils.toTrianglesDrawMode(
+      geometry,
+      THREE.TriangleFanDrawMode
+    );
     mesh = new THREE.Mesh(geometry);
   } else {
     return;
@@ -659,7 +669,10 @@ export function loadUserMesh(
   // Meterial
   if (PRIMITIVE_TYPE.POINTS === primitiveType) {
     materialType = MESH_MATERIAL.POINTS;
-  } else if (PRIMITIVE_TYPE.LINES === primitiveType || PRIMITIVE_TYPE.LINESTRIP === primitiveType) {
+  } else if (
+    PRIMITIVE_TYPE.LINES === primitiveType ||
+    PRIMITIVE_TYPE.LINESTRIP === primitiveType
+  ) {
     materialType = MESH_MATERIAL.LINEBASIC;
   } else {
     if (normals) {
