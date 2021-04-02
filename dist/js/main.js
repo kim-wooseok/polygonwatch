@@ -34,7 +34,10 @@ let screenfullRef;
 let regexFormat;
 let regexGroup;
 
-const REGEX_VS = "(?:[=\\]\\),]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
+// const REGEX_VS = "(?:[=\\]\\)]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
+const REGEX_VS =
+  "(?:(?:x=|y=|z=|\\]|\\))\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
+
 const REGEX_CSV = "([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d)";
 
 function parseValue(id) {
@@ -111,31 +114,32 @@ $("#runButton").click(() => {
     colors = parseColors();
   }
 
-  let primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
+  let primType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
   if (primitiveElements.typePoints.checked === true) {
-    primitiveType = RENDERER.PRIMITIVE_TYPE.POINTS;
+    primType = RENDERER.PRIMITIVE_TYPE.POINTS;
   } else if (primitiveElements.typeLines.checked === true) {
-    primitiveType = RENDERER.PRIMITIVE_TYPE.LINES;
+    primType = RENDERER.PRIMITIVE_TYPE.LINES;
   } else if (primitiveElements.typeLineStrip.checked === true) {
-    primitiveType = RENDERER.PRIMITIVE_TYPE.LINESTRIP;
-  } else if(primitiveElements.typeTriangles.checked === true) {
-    primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
-  } else if(primitiveElements.typeTriangleStrip.checked === true) {
-    primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLESTRIP;
-  }else if(primitiveElements.typeTriangleFan.checked === true) {
-    primitiveType = RENDERER.PRIMITIVE_TYPE.TRIANGLEFAN;
+    primType = RENDERER.PRIMITIVE_TYPE.LINESTRIP;
+  } else if (primitiveElements.typeTriangles.checked === true) {
+    primType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
+  } else if (primitiveElements.typeTriangleStrip.checked === true) {
+    primType = RENDERER.PRIMITIVE_TYPE.TRIANGLESTRIP;
+  } else if (primitiveElements.typeTriangleFan.checked === true) {
+    primType = RENDERER.PRIMITIVE_TYPE.TRIANGLEFAN;
   }
 
-  store.set('user', {
-    dim : primitiveElements.mode2D.checked === true ? 2 : 3,
-    hasIndices : primitiveElements.indices.checked === true,
-    hasNormals : primitiveElements.normals.checked === true,
-    hasColors : primitiveElements.colors.checked === true,
-    primitiveType: primitiveType,
+  // eslint-disable-next-line no-undef
+  store.set("user", {
+    dim: primitiveElements.mode2D.checked === true ? 2 : 3,
+    hasIndices: primitiveElements.indices.checked === true,
+    hasNormals: primitiveElements.normals.checked === true,
+    hasColors: primitiveElements.colors.checked === true,
+    primitiveType: primType,
     dataType: $("#regexSelect").val(),
   });
 
-  RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primitiveType);
+  RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primType);
 });
 
 $("#clearButton").click(() => {
@@ -181,8 +185,8 @@ function onRegexSelectChanged() {
 $("#regexSelect").on("change", onRegexSelectChanged);
 
 $("#primitive3D").change(() => {
-  //primitiveElements.normals.disabled = false;
-  //primitiveElements.typeTriangles.disabled = false;
+  // primitiveElements.normals.disabled = false;
+  // primitiveElements.typeTriangles.disabled = false;
 });
 
 $("#primitive2D").change(() => {
@@ -214,28 +218,27 @@ $("#gl-gui-fullscreen").on("click", () => {
   }
 });
 
-function loadCache()
-{
-  const userCache = store.get('user');
-  if (userCache != undefined)
-  {
-    if (2 === userCache.dim) {
+function loadCache() {
+  // eslint-disable-next-line no-undef
+  const userCache = store.get("user");
+  if (userCache !== undefined) {
+    if (userCache.dim === 2) {
       primitiveElements.mode2D.checked = true;
     } else {
       primitiveElements.mode3D.checked = true;
     }
 
-    if (true === userCache.hasIndices) {
+    if (userCache.hasIndices === true) {
       primitiveElements.indices.checked = true;
     }
-    if (true === userCache.hasNormals) {
+    if (userCache.hasNormals === true) {
       primitiveElements.normals.checked = true;
     }
-    if (true === userCache.hasColors) {
+    if (userCache.hasColors === true) {
       primitiveElements.colors.checked = true;
     }
 
-    switch(userCache.primitiveType) {
+    switch (userCache.primitiveType) {
       case RENDERER.PRIMITIVE_TYPE.POINTS:
         primitiveElements.typePoints.checked = true;
         break;
@@ -261,13 +264,16 @@ function loadCache()
 
     $("#regexSelect").val(userCache.dataType);
     onRegexSelectChanged();
-  }  
+  }
 }
 
 export default function bodyInit(screenfullVar) {
   primitiveElements.mode3D.checked = true;
   primitiveElements.typeTriangles.checked = true;
   primitiveElements.planeXY.checked = true;
+
+  const el = document.getElementById("regexFormat");
+  el.value = REGEX_VS;
 
   RENDERER.init();
   RENDERER.animate();
