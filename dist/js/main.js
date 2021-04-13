@@ -21,6 +21,10 @@ function PrimitiveElements() {
   this.planeZX = $("#planeZX").get(0);
 }
 
+function RegexElements() {
+  this.regexSelect = $("#regexSelect").get(0);
+}
+
 function CanvasElements() {
   this.canvas = $("#gl-canvas").get(0);
   this.fullscreen = $("#svg-fullscreen").get(0);
@@ -28,17 +32,19 @@ function CanvasElements() {
 }
 
 const primitiveElements = new PrimitiveElements();
+const regexElements =  new RegexElements();
 const canvasElements = new CanvasElements();
 
 let screenfullRef;
 let regexFormat;
 let regexGroup;
+let lastCustomFormat;
+let lastCustomGroup;
 
-// const REGEX_VS = "(?:[=\\]\\)]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
 const REGEX_VS =
   "(?:(?:x=|y=|z=|\\]|\\))\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
-
-const REGEX_CSV = "([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d)";
+const REGEX_VS_RELAXED = "(?:[=\\]\\)]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
+const REGEX_NUMBER = "([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d)";
 
 function parseValue(id) {
   const verticesText = document.getElementById(id).value;
@@ -139,6 +145,17 @@ $("#runButton").click(() => {
     dataType: $("#regexSelect").val(),
   });
 
+  const selected = $("#regexSelect").val();
+  if (selected.startsWith("Custom")) {
+    lastCustomFormat = regexFormat;
+    lastCustomGroup = regexGroup;
+    // eslint-disable-next-line no-undef
+    store.set("user", {
+      lastCustomFormat: regexFormat,
+      lastCustomGroup: regexGroup,
+    });
+  }
+
   RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primType);
 });
 
@@ -172,13 +189,31 @@ $(document).ready(() => {
 
 function onRegexSelectChanged() {
   const selected = $("#regexSelect").val();
+  const format = document.getElementById("regexFormat");
+  const group = document.getElementById("regexGroup");
+  format.readOnly = true;
+  group.readOnly = true;
+  group.value = 1;
 
   if (selected.startsWith("Visual")) {
-    const el = document.getElementById("regexFormat");
-    el.value = REGEX_VS;
-  } else if (selected.startsWith("CSV")) {
-    const el = document.getElementById("regexFormat");
-    el.value = REGEX_CSV;
+    format.value = REGEX_VS;
+  } else if (selected.startsWith("Relaxed")) {
+    format.value = REGEX_VS_RELAXED;
+  } else if (selected.startsWith("Number")) {
+    format.value = REGEX_NUMBER;
+  } else if (selected.startsWith("Custom")) {
+    if (lastCustomFormat !== undefined) {
+      format.value = lastCustomFormat;
+    } else {
+      format.value = "";
+    }
+    if (lastCustomGroup !== undefined) {
+      group.value = lastCustomGroup;
+    } else {
+      group.value = "";
+    }
+    format.readOnly = false;
+    group.readOnly = false;
   }
 }
 
@@ -262,7 +297,16 @@ function loadCache() {
         break;
     }
 
+    if (userCache.lastCustomFormat !== undefined) {
+      lastCustomFormat = userCache.lastCustomFormat;
+    }
+    if (userCache.lastCustomGroup !== undefined) {
+      lastCustomGroup = userCache.lastCustomGroup;
+    }
     $("#regexSelect").val(userCache.dataType);
+    if (regexElements.regexSelect.selectedIndex < 0) {
+      regexElements.regexSelect.selectedIndex = 0;
+    }
     onRegexSelectChanged();
   }
 }
