@@ -428,8 +428,12 @@ function primitivePaste(event) {
   if (primitiveFunctionPrototype && primitiveElement) {
     primitiveElement.focus();
 
-    navigator.clipboard.readText().then((clipText) => {
-      primitiveFunctionPrototype.call(primitiveHelper, clipText);
+    navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
+      if (result.state === "granted" || result.state === "prompt") {
+        navigator.clipboard.readText().then((clipText) => {
+          primitiveFunctionPrototype.call(primitiveHelper, clipText);
+        });
+      }
     });
   }
 
