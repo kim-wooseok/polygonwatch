@@ -1,6 +1,17 @@
 import * as RENDERER from "./renderer.js";
 import { loadTestData } from "./test.js";
 
+function simplyfyText(text) {
+  if (text.length > 1000) {
+    const begin = text.substring(0, 450);
+    const mid = "\n\n... a long long text ...\n\n";
+    const end = text.substring(text.length - 450);
+
+    return begin + mid + end;
+  }
+  return text;
+}
+
 function PrimitiveElements() {
   this.mode3D = $("#primitive3D").get(0);
   this.mode2D = $("#primitive2D").get(0);
@@ -19,6 +30,71 @@ function PrimitiveElements() {
   this.planeXY = $("#planeXY").get(0);
   this.planeYZ = $("#planeYZ").get(0);
   this.planeZX = $("#planeZX").get(0);
+
+  this.verticesTextarea = $("#verticesTextarea").get(0);
+  this.indicesTextarea = $("#indicesTextarea").get(0);
+  this.normalsTextarea = $("#normalsTextarea").get(0);
+  this.colorsTextarea = $("#colorsTextarea").get(0);
+
+  this.verticesTextareaReg = $("#verticesTextareaReg").get(0);
+  this.indicesTextareaReg = $("#indicesTextareaReg").get(0);
+  this.normalsTextareaReg = $("#normalsTextareaReg").get(0);
+  this.colorsTextareaReg = $("#colorsTextareaReg").get(0);
+}
+
+function PrimitiveValues() {
+  this.vertices = "";
+  this.indices = "";
+  this.normals = "";
+  this.colors = "";
+
+  this.verticesReg = "";
+  this.indicesReg = "";
+  this.normalsReg = "";
+  this.colorsReg = "";
+
+  this.clear = function _clear() {
+    this.vertices = "";
+    this.indices = "";
+    this.normals = "";
+    this.colors = "";
+
+    this.verticesReg = "";
+    this.indicesReg = "";
+    this.normalsReg = "";
+    this.colorsReg = "";
+  };
+}
+
+class PrimitiveHelper {
+  elements;
+
+  values;
+
+  constructor(_elements, _values) {
+    this.elements = _elements;
+    this.values = _values;
+  }
+
+  setVertices(text) {
+    this.values.vertices = text;
+    this.elements.verticesTextarea.value = simplyfyText(text);
+  }
+
+  setIndices(text) {
+    this.values.indices = text;
+    this.elements.indicesTextarea.value = simplyfyText(text);
+  }
+
+  setNormals(text) {
+    this.values.normals = text;
+    this.elements.normalsTextarea.value = simplyfyText(text);
+  }
+
+  setColors(text) {
+    this.values.colors = text;
+    this.elements.colorsTextarea.value = simplyfyText(text);
+  }
 }
 
 function RegexElements() {
@@ -32,7 +108,9 @@ function CanvasElements() {
 }
 
 const primitiveElements = new PrimitiveElements();
-const regexElements =  new RegexElements();
+const primitiveValues = new PrimitiveValues();
+const primitiveHelper = new PrimitiveHelper(primitiveElements, primitiveValues);
+const regexElements = new RegexElements();
 const canvasElements = new CanvasElements();
 
 let screenfullRef;
@@ -46,44 +124,43 @@ const REGEX_VS =
 const REGEX_VS_RELAXED = "(?:[=\\]\\)]\\s*([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d))";
 const REGEX_NUMBER = "([+-]?\\d*\\.?\\d*e?[+-]?\\d*\\d)";
 
-function parseValue(id) {
-  const verticesText = document.getElementById(id).value;
+function parseValue(sourceText) {
   const re = new RegExp(regexFormat, "gm");
   const result = [];
 
-  let matches = re.exec(verticesText);
+  let matches = re.exec(sourceText);
   while (matches) {
     if (regexGroup < matches.length) {
       const value = matches[regexGroup];
       result.push(value);
     }
-    matches = re.exec(verticesText);
+    matches = re.exec(sourceText);
   }
 
   return result;
 }
 
 function parseVertices() {
-  const result = parseValue("verticesTextarea");
-  document.getElementById("verticesTextareaReg").value = result;
+  const result = parseValue(primitiveValues.vertices);
+  primitiveElements.verticesTextareaReg.value = simplyfyText(result);
   return result;
 }
 
 function parseIndices() {
-  const result = parseValue("indicesTextarea");
-  document.getElementById("indicesTextareaReg").value = result;
+  const result = parseValue(primitiveValues.indices);
+  primitiveElements.indicesTextareaReg.value = simplyfyText(result);
   return result;
 }
 
 function parseNormals() {
-  const result = parseValue("normalsTextarea");
-  document.getElementById("normalsTextareaReg").value = result;
+  const result = parseValue(primitiveValues.normals);
+  primitiveElements.normalsTextareaReg.value = simplyfyText(result);
   return result;
 }
 
 function parseColors() {
-  const result = parseValue("colorsTextarea");
-  document.getElementById("colorsTextareaReg").value = result;
+  const result = parseValue(primitiveValues.colors);
+  primitiveElements.colorsTextareaReg.value = simplyfyText(result);
   return result;
 }
 
@@ -160,17 +237,19 @@ $("#runButton").click(() => {
 });
 
 $("#clearButton").click(() => {
-  document.getElementById("verticesTextarea").value = "";
-  document.getElementById("verticesTextareaReg").value = "";
+  primitiveElements.verticesTextarea.value = "PASTE HERE";
+  primitiveElements.verticesTextareaReg.value = "";
 
-  document.getElementById("indicesTextarea").value = "";
-  document.getElementById("indicesTextareaReg").value = "";
+  primitiveElements.indicesTextarea.value = "PASTE HERE";
+  primitiveElements.indicesTextareaReg.value = "";
 
-  document.getElementById("normalsTextarea").value = "";
-  document.getElementById("normalsTextareaReg").value = "";
+  primitiveElements.normalsTextarea.value = "PASTE HERE";
+  primitiveElements.normalsTextareaReg.value = "";
 
-  document.getElementById("colorsTextarea").value = "";
-  document.getElementById("colorsTextareaReg").value = "";
+  primitiveElements.colorsTextarea.value = "PASTE HERE";
+  primitiveElements.colorsTextareaReg.value = "";
+
+  primitiveValues.clear();
 });
 
 $("#clearScene").click(() => {
@@ -178,7 +257,7 @@ $("#clearScene").click(() => {
 });
 
 $("#testButton").click(() => {
-  loadTestData();
+  loadTestData(primitiveElements, primitiveValues);
 });
 
 $(document).ready(() => {
@@ -253,6 +332,23 @@ $("#gl-gui-fullscreen").on("click", () => {
   }
 });
 
+function textareaPasteEventListner(event) {
+  const paste = (event.clipboardData || window.clipboardData).getData("text");
+
+  const { target } = event;
+  if (target === primitiveElements.verticesTextarea) {
+    primitiveHelper.setVertices(paste);
+  } else if (target === primitiveElements.indicesTextarea) {
+    primitiveHelper.setIndices(paste);
+  } else if (target === primitiveElements.normalsTextarea) {
+    primitiveHelper.setNormals(paste);
+  } else if (target === primitiveElements.colorsTextarea) {
+    primitiveHelper.setColors(paste);
+  }
+  event.preventDefault();
+  return true;
+}
+
 function loadCache() {
   // eslint-disable-next-line no-undef
   const userCache = store.get("user");
@@ -311,10 +407,69 @@ function loadCache() {
   }
 }
 
+function primitivePaste(event) {
+  let primitiveElement = null;
+  let primitiveFunctionPrototype = null;
+
+  if (event.target.id.startsWith("vertices")) {
+    primitiveElement = primitiveHelper.elements.verticesTextarea;
+    primitiveFunctionPrototype = PrimitiveHelper.prototype.setVertices;
+  } else if (event.target.id.startsWith("indices")) {
+    primitiveElement = primitiveHelper.elements.indicesTextarea;
+    primitiveFunctionPrototype = PrimitiveHelper.prototype.setIndices;
+  } else if (event.target.id.startsWith("normals")) {
+    primitiveElement = primitiveHelper.elements.normalsTextarea;
+    primitiveFunctionPrototype = PrimitiveHelper.prototype.setNormals;
+  } else if (event.target.id.startsWith("colors")) {
+    primitiveElement = primitiveHelper.elements.colorsTextarea;
+    primitiveFunctionPrototype = PrimitiveHelper.prototype.setColors;
+  }
+
+  if (primitiveFunctionPrototype && primitiveElement) {
+    primitiveElement.focus();
+
+    navigator.clipboard.readText().then((clipText) => {
+      primitiveFunctionPrototype.call(primitiveHelper, clipText);
+    });
+  }
+
+  event.preventDefault();
+}
+
 export default function bodyInit(screenfullVar) {
   primitiveElements.mode3D.checked = true;
   primitiveElements.typeTriangles.checked = true;
   primitiveElements.planeXY.checked = true;
+
+  document
+    .querySelector("#verticesPaste")
+    .addEventListener("click", primitivePaste);
+  document
+    .querySelector("#indicesPaste")
+    .addEventListener("click", primitivePaste);
+  document
+    .querySelector("#normalsPaste")
+    .addEventListener("click", primitivePaste);
+  document
+    .querySelector("#colorsPaste")
+    .addEventListener("click", primitivePaste);
+
+  primitiveElements.verticesTextarea.addEventListener(
+    "paste",
+    textareaPasteEventListner
+  );
+  primitiveElements.indicesTextarea.addEventListener(
+    "paste",
+    textareaPasteEventListner
+  );
+  primitiveElements.normalsTextarea.addEventListener(
+    "paste",
+    textareaPasteEventListner
+  );
+  primitiveElements.colorsTextarea.addEventListener(
+    "paste",
+    textareaPasteEventListner
+  );
 
   const el = document.getElementById("regexFormat");
   el.value = REGEX_VS;

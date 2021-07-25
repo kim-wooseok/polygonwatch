@@ -1,0 +1,9 @@
+eslint 파서 설정
+    npm install --save-dev babel-eslint
+    .eslintrc
+    "parser": "babel-eslint"
+
+https://www.npmjs.com/package/eslint-plugin-class-property
+
+$ npm i eslint --save-dev
+$ npm install eslint-plugin-class-property

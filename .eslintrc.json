@@ -4,11 +4,13 @@
         "es2020": true,
         "jquery": true
     },
+    "parser": "babel-eslint",
     "extends": [
         "airbnb-base",
         "plugin:prettier/recommended"
     ],
     "plugins": [
+        "class-property",
         "prettier"
     ],
     "parserOptions": {
