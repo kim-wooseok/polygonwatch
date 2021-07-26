@@ -1,7 +1,7 @@
 import * as RENDERER from "./renderer.js";
 import { loadTestData } from "./test.js";
 
-function simplyfyText(text) {
+function simplifyText(text) {
   if (text.length > 1000) {
     const begin = text.substring(0, 450);
     const mid = "\n\n... a long long text ...\n\n";
@@ -9,6 +9,27 @@ function simplyfyText(text) {
 
     return begin + mid + end;
   }
+  return text;
+}
+
+function simplifyArray(array) {
+  let text = "";
+  const lenth = 50;
+
+  for (let i = 0; i < array.length && i < lenth; i += 1) {
+    text += array[i];
+    text += "\n";
+  }
+
+  if (array.length > lenth) {
+    text += "\n... a long long text ...\n\n";
+
+    for (let i = array.length - 50; i < array.length; i += 1) {
+      text += array[i];
+      text += "\n";
+    }
+  }
+
   return text;
 }
 
@@ -48,21 +69,11 @@ function PrimitiveValues() {
   this.normals = "";
   this.colors = "";
 
-  this.verticesReg = "";
-  this.indicesReg = "";
-  this.normalsReg = "";
-  this.colorsReg = "";
-
   this.clear = function _clear() {
     this.vertices = "";
     this.indices = "";
     this.normals = "";
     this.colors = "";
-
-    this.verticesReg = "";
-    this.indicesReg = "";
-    this.normalsReg = "";
-    this.colorsReg = "";
   };
 }
 
@@ -78,22 +89,22 @@ class PrimitiveHelper {
 
   setVertices(text) {
     this.values.vertices = text;
-    this.elements.verticesTextarea.value = simplyfyText(text);
+    this.elements.verticesTextarea.value = simplifyText(text);
   }
 
   setIndices(text) {
     this.values.indices = text;
-    this.elements.indicesTextarea.value = simplyfyText(text);
+    this.elements.indicesTextarea.value = simplifyText(text);
   }
 
   setNormals(text) {
     this.values.normals = text;
-    this.elements.normalsTextarea.value = simplyfyText(text);
+    this.elements.normalsTextarea.value = simplifyText(text);
   }
 
   setColors(text) {
     this.values.colors = text;
-    this.elements.colorsTextarea.value = simplyfyText(text);
+    this.elements.colorsTextarea.value = simplifyText(text);
   }
 }
 
@@ -142,25 +153,25 @@ function parseValue(sourceText) {
 
 function parseVertices() {
   const result = parseValue(primitiveValues.vertices);
-  primitiveElements.verticesTextareaReg.value = simplyfyText(result);
+  primitiveElements.verticesTextareaReg.value = simplifyArray(result);
   return result;
 }
 
 function parseIndices() {
   const result = parseValue(primitiveValues.indices);
-  primitiveElements.indicesTextareaReg.value = simplyfyText(result);
+  primitiveElements.indicesTextareaReg.value = simplifyArray(result);
   return result;
 }
 
 function parseNormals() {
   const result = parseValue(primitiveValues.normals);
-  primitiveElements.normalsTextareaReg.value = simplyfyText(result);
+  primitiveElements.normalsTextareaReg.value = simplifyArray(result);
   return result;
 }
 
 function parseColors() {
   const result = parseValue(primitiveValues.colors);
-  primitiveElements.colorsTextareaReg.value = simplyfyText(result);
+  primitiveElements.colorsTextareaReg.value = simplifyArray(result);
   return result;
 }
 
@@ -407,6 +418,30 @@ function loadCache() {
   }
 }
 
+function enablePasteButton() {
+  document.getElementById("verticesPaste").style.display = "initial";
+  document.getElementById("indicesPaste").style.display = "initial";
+  document.getElementById("normalsPaste").style.display = "initial";
+  document.getElementById("colorsPaste").style.display = "initial";
+
+  primitiveElements.verticesTextarea.readOnly = true;
+  primitiveElements.indicesTextarea.readOnly = true;
+  primitiveElements.normalsTextarea.readOnly = true;
+  primitiveElements.colorsTextarea.readOnly = true;
+}
+
+function disablePasteButton() {
+  document.getElementById("verticesPaste").style.display = "none";
+  document.getElementById("indicesPaste").style.display = "none";
+  document.getElementById("normalsPaste").style.display = "none";
+  document.getElementById("colorsPaste").style.display = "none";
+
+  primitiveElements.verticesTextarea.readOnly = false;
+  primitiveElements.indicesTextarea.readOnly = false;
+  primitiveElements.normalsTextarea.readOnly = false;
+  primitiveElements.colorsTextarea.readOnly = false;
+}
+
 function primitivePaste(event) {
   let primitiveElement = null;
   let primitiveFunctionPrototype = null;
@@ -428,19 +463,34 @@ function primitivePaste(event) {
   if (primitiveFunctionPrototype && primitiveElement) {
     primitiveElement.focus();
 
-    navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
-      if (result.state === "granted" || result.state === "prompt") {
-        navigator.clipboard.readText().then((clipText) => {
-          primitiveFunctionPrototype.call(primitiveHelper, clipText);
-        });
-      }
-    });
+    navigator.clipboard
+      .readText()
+      .then((clipText) => {
+        primitiveFunctionPrototype.call(primitiveHelper, clipText);
+      })
+      .catch(() => {
+        disablePasteButton();
+      });
   }
 
   event.preventDefault();
 }
 
+function checkClipboardPermission() {
+  navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
+    if (result.state === "prompt") {
+      navigator.clipboard.readText().then(() => {
+        enablePasteButton();
+      });
+    } else if (result.state === "granted") {
+      enablePasteButton();
+    }
+  });
+}
+
 export default function bodyInit(screenfullVar) {
+  checkClipboardPermission();
+
   primitiveElements.mode3D.checked = true;
   primitiveElements.typeTriangles.checked = true;
   primitiveElements.planeXY.checked = true;
