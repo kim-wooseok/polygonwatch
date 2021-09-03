@@ -41,6 +41,11 @@
     .ul-oss-shift {
       margin-left: 0.5em;
     }
+    
+    .paste-btn {
+      display: none;
+      float: right;
+    }
 
     #gl-container {
       position: relative;
@@ -326,23 +331,23 @@
       <div class="form-group row row-cols-1 row-cols-sm-2 row-cols-md-4">
         <div class="col div-primitive">
           <lable for="verticesTextarea">Vertices</lable>
-          <button class="btn btn-sm btn-outline-secondary mb-1" id="verticesPaste">Paste</button>
-          <textarea type="text" class="form-control textarea-primitive" id="verticesTextarea" rows="10" readonly="true">PASTE HERE</textarea>
+          <button class="btn btn-sm btn-outline-secondary mb-1 paste-btn" id="verticesPaste">Paste</button>
+          <textarea type="text" class="form-control textarea-primitive" id="verticesTextarea" rows="10">Paste here (replace all text).</textarea>
         </div>
         <div class="col div-primitive">
           <lable for="indicesTextarea">Indices</lable>
-          <button class="btn btn-sm btn-outline-secondary mb-1" id="indicesPaste">Paste</button>
-          <textarea type="text" class="form-control textarea-primitive" id="indicesTextarea" rows="10" readonly="true">PASTE HERE</textarea>
+          <button class="btn btn-sm btn-outline-secondary mb-1 paste-btn" id="indicesPaste">Paste</button>
+          <textarea type="text" class="form-control textarea-primitive" id="indicesTextarea" rows="10">Paste here (replace all text).</textarea>
         </div>
         <div class="col div-primitive">
           <lable for="normalsTextarea">Normals</lable>
-          <button class="btn btn-sm btn-outline-secondary mb-1" id="normalsPaste">Paste</button>
-          <textarea type="text" class="form-control textarea-primitive" id="normalsTextarea" rows="10" readonly="true">PASTE HERE</textarea>
+          <button class="btn btn-sm btn-outline-secondary mb-1 paste-btn" id="normalsPaste">Paste</button>
+          <textarea type="text" class="form-control textarea-primitive" id="normalsTextarea" rows="10">Paste here (replace all text).</textarea>
         </div>
         <div class="col div-primitive">
           <lable for="colorsTextarea">Colors</lable>
-          <button class="btn btn-sm btn-outline-secondary mb-1" id="colorsPaste">Paste</button>
-          <textarea type="text" class="form-control textarea-primitive" id="colorsTextarea" rows="10" readonly="true">PASTE HERE</textarea>
+          <button class="btn btn-sm btn-outline-secondary mb-1 paste-btn" id="colorsPaste">Paste</button>
+          <textarea type="text" class="form-control textarea-primitive" id="colorsTextarea" rows="10">Paste here (replace all text).</textarea>
         </div>
       </div>
 
