@@ -69,11 +69,27 @@ function PrimitiveValues() {
   this.normals = "";
   this.colors = "";
 
+  this.verticesArray = {};
+  this.indicesArray = {};
+  this.normalsArray = {};
+  this.colorsArray = {};
+
+  this.verticesDim = 0;
+  this.indicesDim = 0;
+
   this.clear = function _clear() {
     this.vertices = "";
     this.indices = "";
     this.normals = "";
     this.colors = "";
+
+    this.verticesArray = {};
+    this.indicesArray = {};
+    this.normalsArray = {};
+    this.colorsArray = {};
+
+    this.verticesDim = 0;
+    this.indicesDim = 0;
   };
 }
 
@@ -153,26 +169,56 @@ function parseValue(sourceText) {
 
 function parseVertices() {
   const result = parseValue(primitiveValues.vertices);
+  primitiveValues.verticesArray = result;
   primitiveElements.verticesTextareaReg.value = simplifyArray(result);
   return result;
 }
 
 function parseIndices() {
   const result = parseValue(primitiveValues.indices);
+  primitiveValues.indicesArray = result;
   primitiveElements.indicesTextareaReg.value = simplifyArray(result);
   return result;
 }
 
 function parseNormals() {
   const result = parseValue(primitiveValues.normals);
+  primitiveValues.normalsArray = result;
   primitiveElements.normalsTextareaReg.value = simplifyArray(result);
   return result;
 }
 
 function parseColors() {
   const result = parseValue(primitiveValues.colors);
+  primitiveValues.colorsArray = result;
   primitiveElements.colorsTextareaReg.value = simplifyArray(result);
   return result;
+}
+
+function downloadCSV(v, dim, name) {
+  let result = "";
+
+  if (Array.isArray(v) === false || v.length < 1) {
+    return;
+  }
+
+  result += v[0];
+  for (let x = 1; x < dim; x += 1) {
+    result += `, ${v[x]}`;
+  }
+
+  for (let y = dim; y < v.length; y += dim) {
+    result += "\n";
+
+    result += v[y];
+    for (let x = y + 1; x < y + dim; x += 1) {
+      result += `, ${v[x]}`;
+    }
+  }
+
+  const blob = new Blob([result], { type: "text/csv;charset=utf-8" });
+  // eslint-disable-next-line no-undef
+  saveAs(blob, `${name}.csv`);
 }
 
 function setRegExp() {
@@ -188,6 +234,7 @@ $("#runButton").click(() => {
 
   setRegExp();
   vertices = parseVertices();
+  primitiveValues.verticesDim = 3;
   if (primitiveElements.mode2D.checked === true) {
     const vertices2D = [];
     for (let i = 0; i < vertices.length; i += 2) {
@@ -196,6 +243,7 @@ $("#runButton").click(() => {
       vertices2D.push("0");
     }
     vertices = vertices2D;
+    primitiveValues.verticesDim = 2;
   }
 
   if (primitiveElements.indices.checked === true) {
@@ -211,16 +259,22 @@ $("#runButton").click(() => {
   let primType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
   if (primitiveElements.typePoints.checked === true) {
     primType = RENDERER.PRIMITIVE_TYPE.POINTS;
+    primitiveValues.indicesDim = 1;
   } else if (primitiveElements.typeLines.checked === true) {
     primType = RENDERER.PRIMITIVE_TYPE.LINES;
+    primitiveValues.indicesDim = 2;
   } else if (primitiveElements.typeLineStrip.checked === true) {
     primType = RENDERER.PRIMITIVE_TYPE.LINESTRIP;
+    primitiveValues.indicesDim = 2;
   } else if (primitiveElements.typeTriangles.checked === true) {
     primType = RENDERER.PRIMITIVE_TYPE.TRIANGLES;
+    primitiveValues.indicesDim = 3;
   } else if (primitiveElements.typeTriangleStrip.checked === true) {
     primType = RENDERER.PRIMITIVE_TYPE.TRIANGLESTRIP;
+    primitiveValues.indicesDim = 3;
   } else if (primitiveElements.typeTriangleFan.checked === true) {
     primType = RENDERER.PRIMITIVE_TYPE.TRIANGLEFAN;
+    primitiveValues.indicesDim = 3;
   }
 
   // eslint-disable-next-line no-undef
@@ -476,6 +530,34 @@ function primitivePaste(event) {
   event.preventDefault();
 }
 
+function primitiveSave(event) {
+  let primitiveValue = null;
+  let dim = 0;
+  let name = "noname";
+
+  if (event.target.id.startsWith("vertices")) {
+    primitiveValue = primitiveValues.verticesArray;
+    dim = primitiveValues.verticesDim;
+    name = "vertices";
+  } else if (event.target.id.startsWith("indices")) {
+    primitiveValue = primitiveValues.indicesArray;
+    dim = primitiveValues.indicesDim;
+    name = "indices";
+  } else if (event.target.id.startsWith("normals")) {
+    primitiveValue = primitiveValues.normalsArray;
+    dim = 3;
+    name = "normals";
+  } else if (event.target.id.startsWith("colors")) {
+    primitiveValue = primitiveValues.colorsArray;
+    dim = 3;
+    name = "colors";
+  }
+
+  downloadCSV(primitiveValue, dim, name);
+
+  event.preventDefault();
+}
+
 function checkClipboardPermission() {
   navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
     if (result.state === "prompt") {
@@ -507,6 +589,19 @@ export default function bodyInit(screenfullVar) {
   document
     .querySelector("#colorsPaste")
     .addEventListener("click", primitivePaste);
+
+  document
+    .querySelector("#verticesSave")
+    .addEventListener("click", primitiveSave);
+  document
+    .querySelector("#indicesSave")
+    .addEventListener("click", primitiveSave);
+  document
+    .querySelector("#normalsSave")
+    .addEventListener("click", primitiveSave);
+  document
+    .querySelector("#colorsSave")
+    .addEventListener("click", primitiveSave);
 
   primitiveElements.verticesTextarea.addEventListener(
     "paste",
