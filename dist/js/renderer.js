@@ -1,10 +1,10 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.module.js";
-import { BufferGeometryUtils } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/utils/BufferGeometryUtils.js";
-import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/ColladaLoader.js";
-import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.119.1/examples/jsm/loaders/FBXLoader.js";
-import Stats from "https://cdn.jsdelivr.net/npm/three@0.122.0/examples/jsm/libs/stats.module.js";
-import * as dat from "https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.module.js";
-import { OrbitControls } from "./three.js/examples/jsm/controls/OrbitControls.js";
+import * as THREE from "three";
+import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
+import { ColladaLoader } from "three/addons/loaders/ColladaLoader.js";
+import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import Stats from "three/addons/libs/stats.module.js";
+import * as dat from "https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.module.js";
 import { CenterHelper } from "./helper.js";
 import * as UTIL from "./util.js";
 
@@ -117,7 +117,12 @@ let lookatObject;
 let lookatPos;
 let viewPos;
 
-let boundingSphere;
+// for reset
+const fov0 = 60.0;
+let fovNew = fov0;
+let boundingSphere0;
+const distanceScalar0 = 3.0;
+
 let BasePlane = new WorldPlane(PLANE.XY);
 const manager = new THREE.LoadingManager();
 
@@ -168,7 +173,7 @@ function createAxes(axesScale, pos) {
   return [axesHelperModel, axesHelperModelBlend];
 }
 
-function resetBoundingSphere(meshes) {
+function getBoundingSphere(meshes) {
   const boxList = [];
   meshes.forEach((mesh) => {
     mesh.updateWorldMatrix(true, false);
@@ -182,22 +187,27 @@ function resetBoundingSphere(meshes) {
     boxAll.union(box);
   });
 
-  boundingSphere = new THREE.Sphere();
-  boxAll.getBoundingSphere(boundingSphere);
+  const sphere = new THREE.Sphere();
+  boxAll.getBoundingSphere(sphere);
+  return sphere;
 }
 
-function resetCamera(sphere) {
+function initCamera(sphere) {
   const qtn = new THREE.Quaternion();
-  qtn.setFromAxisAngle(BasePlane.normal, THREE.Math.degToRad(90 + 22.5));
+  qtn.setFromAxisAngle(BasePlane.normal, THREE.MathUtils.degToRad(90 + 22.5));
   const qtr = new THREE.Quaternion();
-  qtr.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(-22.5));
+  qtr.setFromAxisAngle(BasePlane.right, THREE.MathUtils.degToRad(-22.5));
   const qt = qtn.multiply(qtr);
 
   // update camera
   lookatPos = sphere.center.clone();
   lookatObject.position.set(sphere.center);
   viewPos = lookatPos.clone();
-  viewPos.add(BasePlane.forward.clone().multiplyScalar(sphere.radius * -3));
+  viewPos.add(
+    BasePlane.forward
+      .clone()
+      .multiplyScalar(sphere.radius * -1.0 * distanceScalar0)
+  );
 
   const position = viewPos.clone();
   position.sub(lookatPos);
@@ -211,11 +221,37 @@ function resetCamera(sphere) {
   camera.lookAt(lookatPos.clone());
   camera.far = Math.max(sphere.radius * 6, 2000);
   camera.updateProjectionMatrix();
+
+  // Control
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.1;
   controls.target.copy(lookatPos);
+
+  controls.target0 = lookatPos.clone();
+  controls.position0 = position.clone();
+
   controls.update();
+
+  // center
+  centerHelper = new CenterHelper(controls);
 }
 
-function resetHelper(sphere) {
+function resetCamera() {
+  controls.reset();
+}
+
+function setControlDistance(distance) {
+  const offset = controls.object.position
+    .clone()
+    .sub(controls.target)
+    .normalize()
+    .multiplyScalar(distance);
+  const pos = controls.target.clone().add(offset);
+  controls.object.position.copy(pos);
+}
+
+function initHelper(sphere) {
   const gridScale = sphere.radius * 1.5;
   gridHelper.scale.set(gridScale, gridScale, gridScale);
 
@@ -285,9 +321,23 @@ function updateMeshMaterial(mat) {
   });
 }
 
+function preDraw() {
+  if (camera.fov !== fovNew) {
+    const halfFov0 = THREE.MathUtils.degToRad(camera.fov / 2.0);
+    const halfFov1 = THREE.MathUtils.degToRad(fovNew / 2.0);
+    const distance0 = controls.getDistance();
+    const distance1 = (distance0 * Math.tan(halfFov0)) / Math.tan(halfFov1);
+
+    setControlDistance(distance1);
+
+    camera.fov = fovNew;
+    camera.updateProjectionMatrix();
+  }
+}
+
 function GuiParams() {
   this.resetCamera = () => {
-    resetCamera(boundingSphere);
+    resetCamera();
   };
 
   this.wireframe = false;
@@ -302,6 +352,7 @@ function GuiParams() {
 
   // camera
   this.fov = 0;
+  this.distance = 0;
   this.aspect = 0;
   this.near = 0;
   this.far = 0;
@@ -399,13 +450,23 @@ function initGUI() {
   }
   {
     const fCam = fProp.addFolder("Camera");
-    fCam.add(guiParams, "fov", 25, 80).onChange((val) => {
-      camera.fov = val;
-      camera.updateProjectionMatrix();
+
+    fCam.add(guiParams, "fov", 10, 120).onFinishChange((val) => {
+      fovNew = val;
     });
+    const distance = fCam
+      .add(guiParams, "distance")
+      .listen()
+      .step(0.01)
+      .onChange((val) => {
+        const newValue = val < 0.1 ? 0.1 : val;
+        setControlDistance(newValue);
+      });
+    distance.domElement.style.pointerEvents = "none";
+    distance.domElement.style.opacity = 0.7;
     const aspect = fCam.add(guiParams, "aspect").listen();
     aspect.domElement.style.pointerEvents = "none";
-    aspect.domElement.style.opacity = 0.5;
+    aspect.domElement.style.opacity = 0.7;
     fCam
       .add(guiParams, "near")
       .name("near")
@@ -463,7 +524,7 @@ export function init() {
   camera = new THREE.PerspectiveCamera(
     60,
     surfaceWidth / surfaceHeight,
-    0.5,
+    0.1,
     2000
   );
   lookatObject = new THREE.Object3D();
@@ -490,11 +551,6 @@ export function init() {
   targetSurface.appendChild(renderer.domElement);
   window.addEventListener("resize", onWindowResize, false);
 
-  // Control
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.1;
-
   // Group
   const group = new THREE.Group();
 
@@ -506,11 +562,8 @@ export function init() {
   // grid
   gridHelper = new THREE.PolarGridHelper(2, 32, 8, 64, 0x404040, 0x808080);
   const qt = new THREE.Quaternion();
-  qt.setFromAxisAngle(BasePlane.right, THREE.Math.degToRad(90));
+  qt.setFromAxisAngle(BasePlane.right, THREE.MathUtils.degToRad(90));
   gridHelper.applyQuaternion(qt);
-
-  // center
-  centerHelper = new CenterHelper(controls);
 
   // axes
   axisHelper = createAxes(1.0, lookatObject.position);
@@ -519,16 +572,17 @@ export function init() {
   meshList.push(meshAndMaeterial[0]);
   materialList.push(meshAndMaeterial[1]);
 
+  // Init
+  boundingSphere0 = getBoundingSphere(meshList);
+  initCamera(boundingSphere0);
+  initHelper(boundingSphere0);
+
+  // Scene
   scene.add(gridHelper);
   scene.add(centerHelper.group);
   scene.add(axisHelper[0]);
   scene.add(axisHelper[1]);
   scene.add(group);
-
-  // Reset
-  resetBoundingSphere(meshList);
-  resetCamera(boundingSphere);
-  resetHelper(boundingSphere);
 
   // GUI
   guiParams = new GuiParams();
@@ -553,32 +607,46 @@ export function changeBasePlane(planeType) {
   qt.setFromUnitVectors(gridHelper.up, BasePlane.normal);
   gridHelper.applyQuaternion(qt);
 
-  resetCamera(boundingSphere);
+  initCamera(boundingSphere0);
 }
 
 export function animate() {
   requestAnimationFrame(animate);
 
   stats.begin();
-  controls.update();
-  centerHelper.update();
+  {
+    preDraw();
 
-  const lookAtVector = new THREE.Vector3(0, 0, 1);
-  const euler = new THREE.Euler(
-    THREE.Math.degToRad(-15),
-    THREE.Math.degToRad(-30),
-    0
-  );
-  lookAtVector.applyEuler(euler);
-  lookAtVector.applyQuaternion(camera.quaternion);
-  const lightPosition = lookAtVector.multiplyScalar(boundingSphere.radius * 6);
-  lightPosition.add(lookatPos);
-  directionalLight.position.x = lightPosition.x;
-  directionalLight.position.y = lightPosition.y;
-  directionalLight.position.z = lightPosition.z;
-  directionalLight.target = lookatObject;
+    controls.update();
+    centerHelper.update();
 
-  renderer.render(scene, camera);
+    const lookAtVector = new THREE.Vector3(0, 0, 1);
+    const euler = new THREE.Euler(
+      THREE.MathUtils.degToRad(-15),
+      THREE.MathUtils.degToRad(-30),
+      0
+    );
+    lookAtVector.applyEuler(euler);
+    lookAtVector.applyQuaternion(camera.quaternion);
+    const lightPosition = lookAtVector.multiplyScalar(
+      boundingSphere0.radius * 6
+    );
+    lightPosition.add(lookatPos);
+    directionalLight.position.x = lightPosition.x;
+    directionalLight.position.y = lightPosition.y;
+    directionalLight.position.z = lightPosition.z;
+    directionalLight.target = lookatObject;
+
+    // GUI
+    const newDistance = controls.getDistance();
+    if (newDistance !== guiParams.distance) {
+      guiParams.distance = newDistance;
+    }
+
+    // Render
+    renderer.render(scene, camera);
+  }
+
   stats.end();
 }
 
@@ -693,13 +761,15 @@ export function loadUserMesh(
   meshList.push(mesh);
   materialList.push(mesh.material);
 
-  scene.add(group);
-
   updateMeshMaterial(materialType);
 
-  resetBoundingSphere(meshList);
-  resetCamera(boundingSphere);
-  resetHelper(boundingSphere);
+  // Init
+  boundingSphere0 = getBoundingSphere(meshList);
+  initCamera(boundingSphere0);
+  initHelper(boundingSphere0);
+
+  // Scene
+  scene.add(group);
 
   // udpate gui
   guiParams.meshMaterial = materialType;
@@ -789,11 +859,13 @@ export function loadCollada(files) {
     groupList.push(modelGroup);
     groupList.push(group);
 
-    scene.add(group);
+    // Init
+    boundingSphere0 = getBoundingSphere(modelMeshList);
+    initCamera(boundingSphere0);
+    initHelper(boundingSphere0);
 
-    resetBoundingSphere(modelMeshList);
-    resetCamera(boundingSphere);
-    resetHelper(boundingSphere);
+    // Scene
+    scene.add(group);
   });
 }
 

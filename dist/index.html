@@ -47,6 +47,10 @@
       float: right;
     }
 
+    .save-btn {
+      float: right;
+    }
+
     #gl-container {
       position: relative;
     }
@@ -354,18 +358,22 @@
       <div class="form-group row row-cols-1 row-cols-sm-2 row-cols-md-4">
         <div class="col div-primitive">
           <lable for="verticesTextareaReg">Vertices CSV</lable>
+          <button class="btn btn-sm btn-outline-secondary mb-1 save-btn" id="verticesSave">Save</button>
           <textarea type="text" class="form-control textarea-primitive" id="verticesTextareaReg" rows="10" readonly="true"></textarea>
         </div>
         <div class="col div-primitive">
           <lable for="indicesTextareaReg">Indices CSV</lable>
+          <button class="btn btn-sm btn-outline-secondary mb-1 save-btn" id="indicesSave">Save</button>
           <textarea type="text" class="form-control textarea-primitive" id="indicesTextareaReg" rows="10" readonly="true"></textarea>
         </div>
         <div class="col div-primitive">
           <lable for="normalsTextareaReg">Normals CSV</lable>
+          <button class="btn btn-sm btn-outline-secondary mb-1 save-btn" id="normalsSave">Save</button>
           <textarea type="text" class="form-control textarea-primitive" id="normalsTextareaReg" rows="10" readonly="true"></textarea>
         </div>
         <div class="col div-primitive">
           <lable for="colorsTextareaReg">Colors CSV</lable>
+          <button class="btn btn-sm btn-outline-secondary mb-1 save-btn" id="colorsSave">Save</button>
           <textarea type="text" class="form-control textarea-primitive" id="colorsTextareaReg" rows="10" readonly="true"></textarea>
         </div>
       </div>
@@ -495,10 +503,20 @@
 
 </body>
 
+<script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.6.1/dist/es-module-shims.min.js"></script>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.145.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.145.0/examples/jsm/"
+    }
+  }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/screenfull@5.0.2/dist/screenfull.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/store.js@1.0.4/store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <script type="module">
   import * as MAIN from './js/main.js'
   import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate';

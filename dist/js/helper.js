@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.119.1/build/three.module.js";
+import * as THREE from "three";
 
 export default class CenterHelper {
   constructor(targetControl) {
