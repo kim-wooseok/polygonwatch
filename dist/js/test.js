@@ -1,4 +1,4 @@
-export default function loadTestData(elements, values) {
+export default function loadTestData(_primitiveHelper) {
   let vStr = "";
   vStr += "+		[0]	{x=-0.500000000 y=-0.500000000 y=1.500000000 }	Vec3\n"; // red
   vStr += "+		[1]	{x=-0.500000000 y=0.500000000 y=1.500000000 }	Vec3\n";
@@ -228,22 +228,10 @@ export default function loadTestData(elements, values) {
   cStr += "+		[34]	{x=1.00000000 y=0.00000000 z=1.00000000 }	Vec3\n";
   cStr += "+		[35]	{x=1.00000000 y=0.00000000 z=1.00000000 }	Vec3\n";
 
-  document.getElementById("verticesTextarea").value = vStr;
-  document.getElementById("indicesTextarea").value = iStr;
-  document.getElementById("normalsTextarea").value = nStr;
-  document.getElementById("colorsTextarea").value = cStr;
-
-  const targetElements = elements;
-  targetElements.verticesTextarea.value = vStr;
-  targetElements.indicesTextarea.value = iStr;
-  targetElements.normalsTextarea.value = nStr;
-  targetElements.colorsTextarea.value = cStr;
-
-  const targetValues = values;
-  targetValues.vertices = vStr;
-  targetValues.indices = iStr;
-  targetValues.normals = nStr;
-  targetValues.colors = cStr;
+  _primitiveHelper.setVertices(vStr);
+  _primitiveHelper.setIndices(iStr);
+  _primitiveHelper.setNormals(nStr);
+  _primitiveHelper.setColors(cStr);
 }
 
 export { loadTestData };
