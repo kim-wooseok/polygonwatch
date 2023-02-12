@@ -321,8 +321,8 @@ $("#clearScene").click(() => {
   RENDERER.clearScene();
 });
 
-$("#testButton").click(() => {
-  loadTestData(primitiveElements, primitiveValues);
+$("#testButton").click({ param1: primitiveHelper }, (e) => {
+  loadTestData(e.data.param1);
 });
 
 $(document).ready(() => {
