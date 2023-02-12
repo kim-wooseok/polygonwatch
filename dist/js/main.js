@@ -105,7 +105,7 @@ class PrimitiveHelper {
 
   setVertices(text) {
     this.values.vertices = text;
-    $(this.elements.verticesTextarea).text(simplifyText(text));
+    this.elements.verticesTextarea.value = simplifyText(text);
   }
 
   setIndices(text) {
@@ -321,8 +321,8 @@ $("#clearScene").click(() => {
   RENDERER.clearScene();
 });
 
-$("#testButton").click({ param1: primitiveHelper }, (e) => {
-  loadTestData(e.data.param1);
+$("#testButton").click(() => {
+  loadTestData(primitiveElements, primitiveValues);
 });
 
 $(document).ready(() => {
