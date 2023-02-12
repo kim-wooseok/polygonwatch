@@ -193,10 +193,18 @@ function getBoundingSphere(meshes) {
 }
 
 function initCamera(sphere) {
+  const rotateFromNormal = 90 + 22.5;
+  const rotateFromRight = -22.5;
   const qtn = new THREE.Quaternion();
-  qtn.setFromAxisAngle(BasePlane.normal, THREE.MathUtils.degToRad(90 + 22.5));
+  qtn.setFromAxisAngle(
+    BasePlane.normal,
+    THREE.MathUtils.degToRad(rotateFromNormal)
+  );
   const qtr = new THREE.Quaternion();
-  qtr.setFromAxisAngle(BasePlane.right, THREE.MathUtils.degToRad(-22.5));
+  qtr.setFromAxisAngle(
+    BasePlane.right,
+    THREE.MathUtils.degToRad(rotateFromRight)
+  );
   const qt = qtn.multiply(qtr);
 
   // update camera
@@ -223,6 +231,9 @@ function initCamera(sphere) {
   camera.updateProjectionMatrix();
 
   // Control
+  if (controls !== undefined) {
+    controls.dispose();
+  }
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.1;
