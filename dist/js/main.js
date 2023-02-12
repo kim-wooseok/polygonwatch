@@ -559,15 +559,19 @@ function primitiveSave(event) {
 }
 
 function checkClipboardPermission() {
-  navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
-    if (result.state === "prompt") {
-      navigator.clipboard.readText().then(() => {
+  try {
+    navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
+      if (result.state === "prompt") {
+        navigator.clipboard.readText().then(() => {
+          enablePasteButton();
+        });
+      } else if (result.state === "granted") {
         enablePasteButton();
-      });
-    } else if (result.state === "granted") {
-      enablePasteButton();
-    }
-  });
+      }
+    });
+  } catch (error) {
+    disablePasteButton();
+  }
 }
 
 export default function bodyInit(screenfullVar) {
