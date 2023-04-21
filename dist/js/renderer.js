@@ -116,6 +116,7 @@ let axisHelper;
 let lookatObject;
 let lookatPos;
 let viewPos;
+let boundingBox;
 
 // for reset
 const fov0 = 60.0;
@@ -127,6 +128,11 @@ let BasePlane = new WorldPlane(PLANE.XY);
 const manager = new THREE.LoadingManager();
 
 const stats = new Stats();
+
+// getter
+export function getBoundingBox() {
+  return boundingBox;
+}
 
 export function resetViewport() {
   const surfaceWidth = targetSurface.clientWidth;
@@ -718,6 +724,7 @@ export function loadUserMesh(
 
   geometry.computeBoundingSphere();
   geometry.computeBoundingBox();
+  boundingBox = geometry.boundingBox;
 
   let mesh = new THREE.Mesh();
   if (PRIMITIVE_TYPE.POINTS === primitiveType) {
