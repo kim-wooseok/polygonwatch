@@ -1,3 +1,4 @@
+import screenfull from "https://cdn.jsdelivr.net/npm/screenfull@6.0.2/+esm";
 import * as RENDERER from "./renderer.js";
 import { loadTestData } from "./test.js";
 
@@ -61,6 +62,8 @@ function PrimitiveElements() {
   this.indicesTextareaReg = $("#indicesTextareaReg").get(0);
   this.normalsTextareaReg = $("#normalsTextareaReg").get(0);
   this.colorsTextareaReg = $("#colorsTextareaReg").get(0);
+
+  this.objectTextarea = $("#objectTextarea").get(0);
 }
 
 function PrimitiveValues() {
@@ -140,7 +143,6 @@ const primitiveHelper = new PrimitiveHelper(primitiveElements, primitiveValues);
 const regexElements = new RegexElements();
 const canvasElements = new CanvasElements();
 
-let screenfullRef;
 let regexFormat;
 let regexGroup;
 let lastCustomFormat;
@@ -298,7 +300,15 @@ $("#runButton").click(() => {
     });
   }
 
+  // Load
   RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primType);
+  const boundingBox = RENDERER.getBoundingBox();
+  const fBoundingBoxStr = () => {
+    return `boundingBox(min(${boundingBox.min.x}, ${boundingBox.min.y}, ${boundingBox.min.z}), max(${boundingBox.max.x}, ${boundingBox.max.y}, ${boundingBox.max.z}))`;
+  };
+
+  // After load
+  primitiveElements.objectTextarea.value = fBoundingBoxStr();
 });
 
 $("#clearButton").click(() => {
@@ -392,8 +402,8 @@ $("#planeZX").change(() => {
 });
 
 $("#gl-gui-fullscreen").on("click", () => {
-  if (screenfullRef.isEnabled) {
-    screenfullRef.toggle(canvasElements.canvas);
+  if (screenfull.isEnabled) {
+    screenfull.toggle(canvasElements.canvas);
   }
 });
 
@@ -574,7 +584,7 @@ function checkClipboardPermission() {
   }
 }
 
-export default function bodyInit(screenfullVar) {
+export default function bodyInit() {
   checkClipboardPermission();
 
   primitiveElements.mode3D.checked = true;
@@ -630,9 +640,8 @@ export default function bodyInit(screenfullVar) {
   RENDERER.init();
   RENDERER.animate();
 
-  screenfullRef = screenfullVar;
-  screenfullRef.on("change", () => {
-    if (screenfullRef.isFullscreen) {
+  screenfull.on("change", () => {
+    if (screenfull.isFullscreen) {
       canvasElements.fullscreen.style.display = "none";
       canvasElements.fullscreenExit.style.display = "block";
     } else {
