@@ -117,6 +117,7 @@ let lookatObject;
 let lookatPos;
 let viewPos;
 let boundingBox;
+const boundingBoxCenter = new THREE.Vector3();
 
 // for reset
 const fov0 = 60.0;
@@ -132,6 +133,10 @@ const stats = new Stats();
 // getter
 export function getBoundingBox() {
   return boundingBox;
+}
+
+export function getCenter() {
+  return boundingBoxCenter;
 }
 
 export function resetViewport() {
@@ -725,6 +730,7 @@ export function loadUserMesh(
   geometry.computeBoundingSphere();
   geometry.computeBoundingBox();
   boundingBox = geometry.boundingBox;
+  boundingBox.getCenter(boundingBoxCenter);
 
   let mesh = new THREE.Mesh();
   if (PRIMITIVE_TYPE.POINTS === primitiveType) {

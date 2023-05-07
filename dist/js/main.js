@@ -302,9 +302,13 @@ $("#runButton").click(() => {
 
   // Load
   RENDERER.loadUserMesh(vertices, indices, normals, colors, 3, primType);
-  const boundingBox = RENDERER.getBoundingBox();
   const fBoundingBoxStr = () => {
-    return `boundingBox(min(${boundingBox.min.x}, ${boundingBox.min.y}, ${boundingBox.min.z}), max(${boundingBox.max.x}, ${boundingBox.max.y}, ${boundingBox.max.z}))`;
+    const boundingBox = RENDERER.getBoundingBox();
+    const boxCenter = RENDERER.getCenter();
+    let str = `boundingBox(min(${boundingBox.min.x}, ${boundingBox.min.y}, ${boundingBox.min.z}), max(${boundingBox.max.x}, ${boundingBox.max.y}, ${boundingBox.max.z}))`;
+    str += "\n";
+    str += `center(${boxCenter.x}, ${boxCenter.y}, ${boxCenter.z})`;
+    return str;
   };
 
   // After load
