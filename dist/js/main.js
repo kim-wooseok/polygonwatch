@@ -341,7 +341,7 @@ $("#testButton").click({ param1: primitiveHelper }, (e) => {
 
 $(document).ready(() => {
   $("#loadFilesButton").change((ev) => {
-    RENDERER.loadCollada(ev.currentTarget.files);
+    RENDERER.loadModeling(ev.currentTarget.files);
   });
 });
 

@@ -2,7 +2,10 @@ import * as THREE from "three";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import { ColladaLoader } from "three/addons/loaders/ColladaLoader.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import Stats from "three/addons/libs/stats.module.js";
 import * as dat from "https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.module.js";
 import { CenterHelper } from "./helper.js";
@@ -104,6 +107,8 @@ let targetSurface;
 let meshList = [];
 let materialList = [];
 let groupList = [];
+let animationList = null;
+let animationMixer = null;
 
 let directionalLight;
 let ambientLight;
@@ -127,6 +132,7 @@ const distanceScalar0 = 3.0;
 
 let BasePlane = new WorldPlane(PLANE.XY);
 const manager = new THREE.LoadingManager();
+const clock = new THREE.Clock();
 
 const stats = new Stats();
 
@@ -238,7 +244,8 @@ function initCamera(sphere) {
   camera.position.copy(position);
   camera.up.copy(up);
   camera.lookAt(lookatPos.clone());
-  camera.far = Math.max(sphere.radius * 6, 2000);
+  camera.far = Math.max(sphere.radius * 6, 1000);
+  camera.near = camera.far / 1000.0;
   camera.updateProjectionMatrix();
 
   // Control
@@ -368,6 +375,12 @@ function GuiParams() {
   this.objectColor = "#c0c0c0";
   this.meshMaterial = MESH_MATERIAL.BASIC;
 
+  // animations
+  this.selectedClip = -1;
+  this.clipList = { "----------": -1 };
+  this.fClips = null;
+
+  // light
   this.lightColor = "#ffffff";
   this.lightIntensity = 0.7;
   this.ambientColor = "#606060";
@@ -447,6 +460,29 @@ function initGUI() {
       });
   }
   fMat.open();
+
+  gui.fClips = gui.addFolder("Animations");
+  gui.clips = null;
+  gui.updateClips = function _updateClips() {
+    if (gui.clips !== null) {
+      gui.fClips.remove(gui.clips);
+    }
+    gui.clips = gui.fClips
+      .add(guiParams, "selectedClip", guiParams.clipList)
+      .listen()
+      .name("animation clips")
+      .onChange((val) => {
+        // eslint-disable-next-line no-console
+        console.log(`animation: ${val}`);
+        if (val >= 0) {
+          animationMixer.clipAction(animationList[val]).play();
+        } else {
+          animationMixer.stopAllAction();
+        }
+      });
+  };
+  gui.updateClips();
+  gui.fClips.open();
 
   const fProp = gui.addFolder("Properties");
   {
@@ -569,6 +605,13 @@ export function init() {
   renderer.setScissor(0, 0, surfaceWidth, surfaceHeight);
   renderer.setScissorTest(true);
 
+  scene.background = new THREE.Color(0x606060);
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmremGenerator.fromScene(
+    new RoomEnvironment(),
+    0.04
+  ).texture;
+
   // Window event listener
   targetSurface.appendChild(renderer.domElement);
   window.addEventListener("resize", onWindowResize, false);
@@ -639,6 +682,11 @@ export function animate() {
   {
     preDraw();
 
+    const delta = clock.getDelta();
+
+    if (animationMixer !== null) {
+      animationMixer.update(delta);
+    }
     controls.update();
     centerHelper.update();
 
@@ -800,12 +848,13 @@ export function loadUserMesh(
   guiParams.refresh();
 }
 
-export function loadCollada(files) {
+export function loadModeling(files) {
   clearScene();
 
   const extraFiles = {};
   let daeFile = "";
   let fbxFile = "";
+  let gltfFile = "";
 
   for (let i = 0; i < files.length; i += 1) {
     const file = files[i];
@@ -816,6 +865,12 @@ export function loadCollada(files) {
     }
     if (files[i].name.match(/\w*.fbx\b/i)) {
       fbxFile = file.name;
+    }
+    if (files[i].name.match(/\w*.glb\b/i)) {
+      gltfFile = file.name;
+    }
+    if (files[i].name.match(/\w*.gltf\b/i)) {
+      gltfFile = file.name;
     }
   }
 
@@ -833,9 +888,6 @@ export function loadCollada(files) {
     return url;
   });
 
-  // eslint-disable-next-line no-console
-  console.log(daeFile);
-
   let modelLoader;
   let modelFile;
   if (daeFile.length > 0) {
@@ -844,31 +896,42 @@ export function loadCollada(files) {
   } else if (fbxFile.length > 0) {
     modelLoader = new FBXLoader(manager);
     modelFile = fbxFile;
+  } else if (gltfFile.length > 0) {
+    modelLoader = new GLTFLoader(manager);
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath(
+      "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/gltf/"
+    );
+    modelLoader.setDRACOLoader(dracoLoader);
+
+    modelFile = gltfFile;
   }
+
+  // eslint-disable-next-line no-console
+  console.log(modelFile);
 
   if (modelFile === undefined || modelLoader === undefined) {
     return;
   }
 
-  modelLoader.load(modelFile, (model) => {
-    let modelGroup;
+  modelLoader.load(modelFile, (modelObject) => {
+    let model;
     if (fbxFile.length > 0) {
-      modelGroup = model;
+      model = modelObject;
     } else {
-      modelGroup = model.scene;
+      model = modelObject.scene;
     }
 
     const modelMeshList = [];
-    modelGroup.traverse((_child) => {
+    model.traverse((_child) => {
       const child = _child;
       if (child.isMesh) {
         if (child.material.length > 1) {
           for (let i = 0; i < child.material.length; i += 1) {
-            child.material[i].side = THREE.DoubleSide;
             materialList.push(child.material[i]);
           }
         } else {
-          child.material.side = THREE.DoubleSide;
           materialList.push(child.material);
         }
         child.geometry.computeBoundingSphere();
@@ -877,10 +940,25 @@ export function loadCollada(files) {
       }
     });
 
-    scene.add(modelGroup);
+    // animation
+    animationList = modelObject.animations;
+    guiParams.clipList = { "----------": -1 };
+    for (let i = 0; i < animationList.length; i += 1) {
+      guiParams.clipList[animationList[i].name] = i;
+    }
+    gui.updateClips();
+    guiParams.selectedClip = -1;
+    if (animationList.length > 0) {
+      animationMixer = new THREE.AnimationMixer(model);
+    } else {
+      animationMixer = null;
+    }
+
+    // scene
+    scene.add(model);
     const group = new THREE.Group();
 
-    groupList.push(modelGroup);
+    groupList.push(model);
     groupList.push(group);
 
     // Init
