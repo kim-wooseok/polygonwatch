@@ -10,6 +10,7 @@ import Stats from "three/addons/libs/stats.module.js";
 import * as dat from "https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.module.js";
 import { CenterHelper } from "./helper.js";
 import * as UTIL from "./util.js";
+import * as SceneUtil from "./sceneUtil.js";
 
 export const PRIMITIVE_MODE = {
   D3D: 100,
@@ -105,6 +106,7 @@ let renderer;
 let targetSurface;
 
 let meshList = [];
+let normalsHelperList = [];
 let materialList = [];
 let groupList = [];
 let animationList = null;
@@ -392,6 +394,10 @@ function GuiParams() {
   this.near = 0;
   this.far = 0;
 
+  // helpers
+  this.normal = false;
+  this.normalSize = 1.0;
+
   // renderer
   this.viewport = new THREE.Vector4(0, 0, 0, 0);
   this.resetViewport = function _resetViewport() {
@@ -548,6 +554,25 @@ function initGUI() {
     });
   }
   {
+    const fHelper = fProp.addFolder("Helper");
+    fHelper.add(guiParams, "normal").onChange((val) => {
+      for (let i = 0; i < normalsHelperList.length; i += 1) {
+        const normalsHelper = normalsHelperList[i];
+        normalsHelper.visible = val;
+      }
+    });
+    fHelper
+      .add(guiParams, "normalSize")
+      .step(0.2)
+      .onChange((val) => {
+        for (let i = 0; i < normalsHelperList.length; i += 1) {
+          const normalsHelper = normalsHelperList[i];
+          normalsHelper.size = val;
+          normalsHelper.update();
+        }
+      });
+  }
+  {
     const fRenderer = fProp.addFolder("Renderer");
     fRenderer.add(guiParams.viewport, "x").onChange(() => {
       updateViewport(guiParams.viewport);
@@ -661,6 +686,16 @@ export function init() {
   guiParams.far = camera.far;
   renderer.getViewport(guiParams.viewport);
 
+  // Helper
+  // normal
+  const normalsHelper = SceneUtil.createNormalsHelper(
+    meshAndMaeterial[0],
+    guiParams.normal,
+    guiParams.normalSize
+  );
+  group.add(normalsHelper);
+  normalsHelperList.push(normalsHelper);
+
   initGUI();
 }
 
@@ -728,6 +763,7 @@ export function clearScene() {
   groupList = [];
   materialList = [];
   meshList = [];
+  normalsHelperList = [];
 }
 
 export function loadUserMesh(
@@ -840,6 +876,15 @@ export function loadUserMesh(
   initCamera(boundingSphere0);
   initHelper(boundingSphere0);
 
+  // Helper
+  const normalsHelper = SceneUtil.createNormalsHelper(
+    mesh,
+    guiParams.normal,
+    guiParams.normalSize
+  );
+  group.add(normalsHelper);
+  normalsHelperList.push(normalsHelper);
+
   // Scene
   scene.add(group);
 
@@ -923,6 +968,7 @@ export function loadModeling(files) {
       model = modelObject.scene;
     }
 
+    // mesh
     const modelMeshList = [];
     model.traverse((_child) => {
       const child = _child;
@@ -965,6 +1011,17 @@ export function loadModeling(files) {
     boundingSphere0 = getBoundingSphere(modelMeshList);
     initCamera(boundingSphere0);
     initHelper(boundingSphere0);
+
+    // helper
+    modelMeshList.forEach((mesh) => {
+      const normalsHelper = SceneUtil.createNormalsHelper(
+        mesh,
+        guiParams.normal,
+        guiParams.normalSize
+      );
+      group.add(normalsHelper);
+      normalsHelperList.push(normalsHelper);
+    });
 
     // Scene
     scene.add(group);
