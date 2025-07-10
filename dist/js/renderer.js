@@ -246,8 +246,8 @@ function initCamera(sphere) {
   camera.position.copy(position);
   camera.up.copy(up);
   camera.lookAt(lookatPos.clone());
-  camera.far = Math.max(sphere.radius * 6, 1000);
-  camera.near = camera.far / 1000.0;
+  camera.far = Math.min(Math.max(sphere.radius * 20, 1000), 100000);
+  camera.near = camera.far / 10000.0;
   camera.updateProjectionMatrix();
 
   // Control
@@ -265,7 +265,7 @@ function initCamera(sphere) {
   controls.update();
 
   // center
-  centerHelper = new CenterHelper(controls);
+  centerHelper = new CenterHelper(controls, sphere.radius);
 }
 
 function resetCamera() {
@@ -284,10 +284,16 @@ function setControlDistance(distance) {
 
 function initHelper(sphere) {
   const gridScale = sphere.radius * 1.5;
+  const gridCenter = new THREE.Vector3(sphere.center.x, sphere.center.y, 0);
+
+  gridHelper.position.copy(gridCenter);
   gridHelper.scale.set(gridScale, gridScale, gridScale);
 
+  const axisScale = sphere.radius * 0.5;
   axisHelper[0].position.copy(sphere.center);
   axisHelper[1].position.copy(sphere.center);
+  axisHelper[0].scale.set(axisScale, axisScale, axisScale);
+  axisHelper[1].scale.set(axisScale, axisScale, axisScale);
 }
 
 function updateViewport(vp) {
@@ -563,7 +569,7 @@ function initGUI() {
     });
     fHelper
       .add(guiParams, "normalSize")
-      .step(0.2)
+      .step(0.1)
       .onChange((val) => {
         for (let i = 0; i < normalsHelperList.length; i += 1) {
           const normalsHelper = normalsHelperList[i];
@@ -877,18 +883,26 @@ export function loadUserMesh(
   initHelper(boundingSphere0);
 
   // Helper
-  const normalsHelper = SceneUtil.createNormalsHelper(
-    mesh,
-    guiParams.normal,
-    guiParams.normalSize
-  );
-  group.add(normalsHelper);
-  normalsHelperList.push(normalsHelper);
+  if (
+    PRIMITIVE_TYPE.TRIANGLES === primitiveType ||
+    PRIMITIVE_TYPE.TRIANGLESTRIP === primitiveType ||
+    PRIMITIVE_TYPE.TRIANGLEFAN === primitiveType
+  ) {
+    const normalsHelper = SceneUtil.createNormalsHelper(
+      mesh,
+      guiParams.normal,
+      guiParams.normalSize
+    );
+    group.add(normalsHelper);
+    normalsHelperList.push(normalsHelper);
+  }
 
   // Scene
   scene.add(group);
 
   // udpate gui
+  guiParams.near = camera.near;
+  guiParams.far = camera.far;
   guiParams.meshMaterial = materialType;
   guiParams.refresh();
 }

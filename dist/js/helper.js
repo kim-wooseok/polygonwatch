@@ -1,10 +1,10 @@
 import * as THREE from "three";
 
 export default class CenterHelper {
-  constructor(targetControl) {
+  constructor(targetControl, radius) {
     this.targetControl = targetControl;
 
-    const geometry = new THREE.SphereGeometry(1, 32, 32);
+    const geometry = new THREE.SphereGeometry(radius, 16, 16);
     const material = new THREE.MeshBasicMaterial({ color: 0xb0b0b0 });
     material.opacity = 0.5;
     material.transparent = true;
@@ -12,7 +12,7 @@ export default class CenterHelper {
     material.depthWrite = false;
     this.sphere = new THREE.Mesh(geometry, material);
 
-    const geometryDot = new THREE.SphereGeometry(0.4, 32, 32);
+    const geometryDot = new THREE.SphereGeometry(radius * 0.5, 16, 16);
     const materialDot = new THREE.MeshBasicMaterial({ color: 0xd0d0d0 });
     materialDot.opacity = 0.75;
     materialDot.transparent = true;
